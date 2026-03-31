@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-// The SECRET_KEY should match what is in your .env file
+const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
 
@@ -8,30 +8,24 @@ async function logInPost(req, res) {
     try {
         const { username, password } = req.body;
         
-        // FIX 1: Use 'let' instead of 'const'
         let token = null; 
 
         if (username && password) {
-            // FIX 2: Use findUnique (or findFirst) to return an object, not an array.
-            // (Assuming your schema uses "model User", this is prisma.user)
             const user = await prisma.users.findUnique({
                 where: { username: username }
             });
 
-            // FIX 3: Check if the user exists before checking passwords
             if (!user) {
-                // FIX 4: Send a 401 status code so React knows it's an auth error
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            // Now it's safe to compare passwords because 'user' definitely exists
             let match = await bcrypt.compare(password, user.password);
             
             if (match) {
                 token = jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: '12h' });
                 return res.json({ token, username: user.username });
             } else {
-                return res.status(401).json({ message: "Invalid credentials" });
+                return res.status(401).json({ message: "Invalid password" });
             }
         } else {
             return res.status(400).json({ message: "Username and password are required" });
@@ -50,27 +44,70 @@ function verifyToken(req, res, next) {
         const bearerToken = bearerHeader.split(' ')[1];
         
         jwt.verify(bearerToken, process.env.SECRET_KEY, function (err, data) {
-            // FIX 5: Simplified the error checking logic
             if (err) {
                 return res.sendStatus(403);
             }
             
             req.user = { username: data.username, verified: true };
-            return next(); // FIX 6: Added 'return' to stop execution here
+            return next();
         });
     } else {
         return res.sendStatus(403);
     }
 }
 
+const validateUser = [
+    body("password").trim().isLength({min: 6, max: 25}).withMessage("Password should be atleast 6 characters long"),
+    body("username").trim()
+    .isLength({min: 1, max: 10}).withMessage(`Username must be between 1 and 10 characters.`)
+    .custom(async (value) => {
+        const user = await prisma.users.findUnique({
+            where: {
+                username: value
+            }
+        })
+
+        if(user) {
+            throw new Error("Username already in use");
+        }
+    })
+]
+
+let signUpPagePost = [
+    validateUser,
+    async (req, res, next) => {
+        console.log(req.body)
+        try {
+            const errors = validationResult(req);
+            if(!errors.isEmpty()){
+                return res.status(400).json({errors: errors.array()})
+            }
+
+            const {password} = matchedData(req);
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            await prisma.users.createMany({
+                data: [
+                    {username: req.body.username, email: req.body.email, password: hashedPassword}
+                ]
+            })
+
+            return res.json({message: "Nice, you can sign in now!"});
+        } catch(err) {
+            console.error("SignUp Error:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+]
+
+
 function logout(req, res) {
-    // Since JWTs are stateless, actual "logout" is handled by the React frontend 
-    // deleting the token from localStorage. Returning 200 is perfectly fine here.
     return res.sendStatus(200);
 }
 
 module.exports = {
     logInPost,
     verifyToken,
+    signUpPagePost,
     logout
 }
