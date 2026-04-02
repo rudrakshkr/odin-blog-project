@@ -57,9 +57,11 @@ function verifyToken(req, res, next) {
 }
 
 const validateUser = [
+    body("email").isEmail().withMessage("Invalid email address. Please try again."),
     body("password").trim().isLength({min: 6, max: 25}).withMessage("Password should be atleast 6 characters long"),
     body("username").trim()
-    .isLength({min: 1, max: 10}).withMessage(`Username must be between 1 and 10 characters.`)
+    .isLength({min: 6}).withMessage(`Username must be atleast 6 characters long`)
+    .isLength({max: 15}).withMessage(`Username should not exceed 15 characters`)
     .custom(async (value) => {
         const user = await prisma.users.findUnique({
             where: {
@@ -79,6 +81,8 @@ let signUpPagePost = [
         console.log(req.body)
         try {
             const errors = validationResult(req);
+            console.log(errors.errors)
+
             if(!errors.isEmpty()){
                 return res.status(400).json({errors: errors.array()})
             }

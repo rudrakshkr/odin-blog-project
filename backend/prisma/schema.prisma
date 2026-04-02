@@ -17,4 +17,21 @@ model Users {
   username String @unique @db.VarChar(255)
   email String @db.VarChar(255)
   password String @db.VarChar(255)
+  posts Posts[]
+}
+
+model Posts {
+  id Int @id @default(autoincrement())
+  title String @unique
+  description String
+  coverImage String
+  status String
+  category String
+  tags String[]
+  urlSlug String @unique
+  summary String
+  date DateTime @default(now())
+
+  userId Int
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
