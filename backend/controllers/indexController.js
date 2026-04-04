@@ -22,7 +22,7 @@ async function logInPost(req, res) {
             let match = await bcrypt.compare(password, user.password);
             
             if (match) {
-                token = jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: '12h' });
+                token = jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: '7d' });
                 return res.json({ token, username: user.username });
             } else {
                 return res.status(401).json({ message: "Invalid password" });
@@ -39,12 +39,14 @@ async function logInPost(req, res) {
 function verifyToken(req, res, next) {
     req.user = { username: null, verified: false };
     const bearerHeader = req.headers['authorization'];
+    console.log(bearerHeader)
 
     if (typeof bearerHeader !== "undefined") {
         const bearerToken = bearerHeader.split(' ')[1];
         
         jwt.verify(bearerToken, process.env.SECRET_KEY, function (err, data) {
             if (err) {
+                console.error("JWT Error:", err.message);
                 return res.sendStatus(403);
             }
             
@@ -104,6 +106,33 @@ let signUpPagePost = [
     }
 ]
 
+function submitPost(req, res, next) {
+    try {
+        const {
+            postTitle, 
+            postCoverImage, 
+            postDescription,
+            postStatus,
+            postCategory,
+            postTags,
+            postUrl,
+            postSummary
+        } = req.body;
+
+        console.log(postTitle, 
+            postCoverImage, 
+            postDescription,
+            postStatus,
+            postCategory,
+            postTags,
+            postUrl,
+            postSummary)
+    }
+    catch(err) {
+        return next(err);
+    }
+}
+
 
 function logout(req, res) {
     return res.sendStatus(200);
@@ -113,5 +142,6 @@ module.exports = {
     logInPost,
     verifyToken,
     signUpPagePost,
+    submitPost,
     logout
 }
