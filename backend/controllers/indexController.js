@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
+const { post } = require("../routes/indexRouter.js");
 
 async function logInPost(req, res) {
     try {
@@ -39,7 +40,6 @@ async function logInPost(req, res) {
 function verifyToken(req, res, next) {
     req.user = { username: null, verified: false };
     const bearerHeader = req.headers['authorization'];
-    console.log(bearerHeader)
 
     if (typeof bearerHeader !== "undefined") {
         const bearerToken = bearerHeader.split(' ')[1];
@@ -80,10 +80,8 @@ const validateUser = [
 let signUpPagePost = [
     validateUser,
     async (req, res, next) => {
-        console.log(req.body)
         try {
             const errors = validationResult(req);
-            console.log(errors.errors)
 
             if(!errors.isEmpty()){
                 return res.status(400).json({errors: errors.array()})
@@ -106,7 +104,7 @@ let signUpPagePost = [
     }
 ]
 
-function submitPost(req, res, next) {
+async function submitPost(req, res, next) {
     try {
         const {
             postTitle, 
@@ -116,20 +114,82 @@ function submitPost(req, res, next) {
             postCategory,
             postTags,
             postUrl,
-            postSummary
+            postSummary,
+            user
         } = req.body;
 
-        console.log(postTitle, 
-            postCoverImage, 
-            postDescription,
-            postStatus,
-            postCategory,
-            postTags,
-            postUrl,
-            postSummary)
+        const getUser = await prisma.users.findUnique({
+            where: {
+                username: user.name
+            }
+        })
+
+        await prisma.posts.create({
+            data: {
+                title: postTitle,
+                coverImage: postCoverImage,
+                description: postDescription,
+                status: postStatus,
+                category: postCategory,
+                tags: [postTags],
+                urlSlug: postUrl,
+                summary: postSummary,
+                userId: getUser.id
+            }
+        })
+
+        return res.json({message: "Data uploaded"})
     }
     catch(err) {
-        return next(err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+async function getPosts(req, res, next) {
+    try {
+        const tokenUsername = req.user.username;
+
+        const getUser = await prisma.users.findUnique({
+            where: {
+                username: tokenUsername
+            }
+        })
+
+        if(!getUser) {
+            return res.status(404).json({message: "User not found"});
+        }
+
+        const getPosts = await prisma.posts.findMany({
+            where: {
+                userId: getUser.id
+            }
+        })
+
+        return res.json({posts: getPosts})
+    }
+    catch(err){
+        console.error("Prisma Error:", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+async function togglePost(req, res, next) {
+    try {
+        const {postId} = req.params;
+        const {status} = req.body;
+
+        await prisma.posts.update({
+            where: {id: parseInt(postId)},
+            data: {
+                status: status
+            }
+        })
+        
+        res.json({message: "Status updated!"})
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
     }
 }
 
@@ -143,5 +203,7 @@ module.exports = {
     verifyToken,
     signUpPagePost,
     submitPost,
+    getPosts,
+    togglePost,
     logout
 }
