@@ -15,7 +15,8 @@ const NewPost = ({user, setUser}) => {
         postCategory: '',
         postTags: '',
         postUrl: '',
-        postSummary: ''
+        postSummary: '',
+        user: user
     })
 
     const handleChange = (e) => {
@@ -72,8 +73,15 @@ const NewPost = ({user, setUser}) => {
                 return;
             }
 
-            if(res.ok) {
-                console.log("Post published successfully!");
+            if(!res.ok) {
+                setErrors(["Something went wrong. Please try again."])
+            }
+            else {
+                // Success
+                // Redirect to Profile page
+                navigate('/profile', {
+                    state: {postSuccessMessage: "Post has been created!"}
+                });
             }
         }
         catch(err) {
