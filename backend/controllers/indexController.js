@@ -4,6 +4,7 @@ const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
 const { post } = require("../routes/indexRouter.js");
+const { token } = require("morgan");
 
 async function logInPost(req, res) {
     try {
@@ -107,31 +108,39 @@ let signUpPagePost = [
 async function submitPost(req, res, next) {
     try {
         const {
-            postTitle, 
-            postCoverImage, 
+            postTitle,
             postDescription,
             postStatus,
             postCategory,
             postTags,
             postUrl,
-            postSummary,
-            user
+            postSummary
         } = req.body;
+
+        const tokenUsername = req.user.username;
+
+        const coverImagePath = req.file ? req.file.path : null;
 
         const getUser = await prisma.users.findUnique({
             where: {
-                username: user.name
+                username: tokenUsername
             }
         })
+
+        if(!getUser) {
+            return res.status(404).json({message: "User not found"});
+        }
+
+        const formattedTags = postTags ? postTags.split(',').map(tag => tag.trim()) : [];
 
         await prisma.posts.create({
             data: {
                 title: postTitle,
-                coverImage: postCoverImage,
+                coverImage: coverImagePath,
                 description: postDescription,
                 status: postStatus,
                 category: postCategory,
-                tags: [postTags],
+                tags: formattedTags,
                 urlSlug: postUrl,
                 summary: postSummary,
                 userId: getUser.id
@@ -141,6 +150,65 @@ async function submitPost(req, res, next) {
         return res.json({message: "Data uploaded"})
     }
     catch(err) {
+        console.error("Submit post error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+async function editPostPut(req, res, next) {
+    try {
+        const {postId} = req.params;
+
+        const {
+            postTitle,
+            postDescription,
+            postStatus,
+            postCategory,
+            postTags,
+            postUrl,
+            postSummary
+        } = req.body;
+
+        const tokenUsername = req.user.username;
+
+        const getUser = await prisma.users.findUnique({
+            where: {
+                username: tokenUsername
+            }
+        })
+
+
+        if(!getUser) {
+            return res.status(404).json({message: "User not found"});
+        }
+
+        const formattedTags = postTags ? postTags.split(',').map(tag => tag.trim()) : [];
+
+        const updateData = {
+            title: postTitle,
+            description: postDescription,
+            status: postStatus,
+            category: postCategory,
+            tags: formattedTags,
+            urlSlug: postUrl,
+            summary: postSummary
+        }
+
+        if(req.file) {
+            updateData.coverImage = req.file.path;
+        }
+
+        await prisma.posts.update({
+            where: {
+                id: parseInt(postId)
+            },
+            data: updateData
+        })
+
+        return res.json({message: "Data uploaded"})
+    }
+    catch(err) {
+        console.error("Submit post error: ", err);
         return res.status(500).json({message: "Internal Server Error"});
     }
 }
@@ -193,6 +261,28 @@ async function togglePost(req, res, next) {
     }
 }
 
+async function getPostById(req, res, next) {
+    try {
+        const {postId} = req.params;
+
+        const getPost = await prisma.posts.findUnique({
+            where: {
+                id: parseInt(postId)
+            }
+        })
+
+        if(!getPost) {
+            return res.json({message: "Failed to fetch posts!"})
+        }
+
+        return res.json({post: getPost})
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 
 function logout(req, res) {
     return res.sendStatus(200);
@@ -205,5 +295,7 @@ module.exports = {
     submitPost,
     getPosts,
     togglePost,
+    getPostById,
+    editPostPut,
     logout
 }
