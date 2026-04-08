@@ -19,6 +19,21 @@ const NewPost = ({user, setUser}) => {
         user: user
     })
 
+    const handleLogout = async (e) => {
+        e.preventDefault(e)
+        const res = await fetch('/api/logout', {
+            method: 'GET'
+        })
+
+        if(!res.ok) {
+            throw new Error("Can't logout, please try again!")
+        }
+        else {
+            localStorage.removeItem('jwtToken');
+            setUser({auth: false, name: ''})
+        }
+    }
+
     const handleChange = (e) => {
         const {name, value} = e.target;
 
@@ -112,6 +127,7 @@ const NewPost = ({user, setUser}) => {
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 z-10 relative">
                 <div className="flex justify-between items-center w-full max-w-6xl mx-auto px-4 pt-4">
                     
+                    {/* Left Side: Navigation Links */}
                     <div className="flex gap-8 font-geist text-[#6f7279] font-semibold">
                         <Link to="/profile" className="pb-4 hover:text-slate-900 transition-colors">
                             Posts
@@ -126,14 +142,28 @@ const NewPost = ({user, setUser}) => {
                         </Link>
                     </div>
 
-                    <div className="pb-4 text-md">
-                        <p>Welcome <strong>{user.name}</strong></p>
+                    {/* Right Side: User Info & Logout Button */}
+                    <div className="flex items-center gap-6 pb-4">
+                        <p className="text-md text-slate-700">
+                            Welcome <strong>{user.name}</strong>
+                        </p>
+                        
+                        <button 
+                            onClick={handleLogout}
+                            className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                        >
+                            Logout
+                        </button>
                     </div>
                     
                 </div>
             </nav>
             <main className="w-full flex-1 bg-[#f8fafc]">
-                {/* Post title */}
+                {errors.length !== 0 && (
+                    <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm text-center font-medium">
+                        {errors}
+                    </div>
+                )}
                 <form action="/api/submit-post" method="POST" className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
                     {/* Left hand side  */}
                     <section className="flex flex-1 flex-col gap-8">
