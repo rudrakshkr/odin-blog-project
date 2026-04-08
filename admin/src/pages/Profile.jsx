@@ -10,9 +10,14 @@ const Profile = ({user, setUser}) => {
 
     // States
     const [errors, setErrors] = useState("");
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState(() => {
+        const saved = sessionStorage.getItem("cachedPosts");
+        return saved ? JSON.parse(saved) : [];
+    });
     const [successMessage, setSuccessMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(() => {
+        return sessionStorage.getItem("cachedPosts") ? false : true;
+    });
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
@@ -85,6 +90,7 @@ const Profile = ({user, setUser}) => {
                     // Successfully got the data!
                     console.log(data.posts)
                     setPosts(data.posts)
+                    sessionStorage.setItem("cachedPosts", JSON.stringify(data.posts));
                 }
             } 
             finally {
@@ -92,7 +98,7 @@ const Profile = ({user, setUser}) => {
             }
         } 
         getPosts();  
-    }, []);
+    }, [token]);
 
     return (
         <div className="w-full min-h-screen flex flex-col">
