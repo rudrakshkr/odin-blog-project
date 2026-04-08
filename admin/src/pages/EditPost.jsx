@@ -1,12 +1,15 @@
 import { Link, useNavigate, useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { Editor } from "@tinymce/tinymce-react";
+import {ThreeDots} from "react-loader-spinner"
+import { TailSpin } from "react-loader-spinner";
 
 const EditPost = ({ user, setUser }) => {
     const token = localStorage.getItem("jwtToken");
     const navigate = useNavigate();
     const {postId} = useParams();
 
+    // States
     const [errors, setErrors] = useState('');
     const [previewUrl, setPreviewUrl] = useState(null);
     const [formData, setFormData] = useState({
@@ -19,6 +22,8 @@ const EditPost = ({ user, setUser }) => {
         postUrl: '',
         postSummary: ''
     })
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -51,6 +56,9 @@ const EditPost = ({ user, setUser }) => {
                 }
             } catch(err) {
                 console.error("Failed to fetch post", err);
+            }
+            finally {
+                setIsLoading(false);
             }
         }
 
@@ -97,6 +105,7 @@ const EditPost = ({ user, setUser }) => {
         }
 
         try {
+            setIsSubmitting(true);
             const res = await fetch(`/api/${postId}/edit-post`, {
                 method: 'PUT',
                 headers: {
@@ -145,185 +154,216 @@ const EditPost = ({ user, setUser }) => {
                     
                 </div>
             </nav>
-            <main className="w-full flex-1 bg-[#f8fafc]">
-                {/* Post title */}
-                <form className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
-                    {/* Left hand side  */}
-                    <section className="flex flex-1 flex-col gap-8">
-                        {/* Post title */}
-                        <div>
-                            <label htmlFor="postTitle"></label>
-                            <input 
-                                type="text" 
-                                name="postTitle" 
-                                id="postTitle" 
-                                value={formData.postTitle}
-                                onChange={handleChange}
-                                placeholder="Post Title"
-                                className="w-full px-0 py-3 text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
-                                required
-                            />
-                        </div>
-                        
-                        {/* Post Cover Image  */}
-                        <div className="flex justify-center relative px-6 py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
-                            <input 
-                                type="file" 
-                                name="postCoverImage" 
-                                id="postCoverImage" 
-                                onChange={handleChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                accept="image/*"
-                            />
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Cover preview" className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
-                            ) : (
-                                <div id="addImage" className="flex flex-col justify-center items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
-                                    <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Post Description  */}
-                        <div>
-                            <Editor
-                                    apiKey = {import.meta.env.VITE_Tiny_API_KEY}
-                                    value={formData.postDescription}
-                                    onEditorChange={(newContent) => {
-                                        setFormData((prevData) => ({
-                                            ...prevData,
-                                            postDescription: newContent
-                                        }));
-                                    }}
-                                    init={{
-                                    plugins: [
-                                        // Core editing features
-                                        'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-                                        // Your account includes a free trial of TinyMCE premium features
-                                        // Try the most popular premium features until Apr 19, 2026:
-                                        'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'tinymceai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
-                                    ],
-                                    height: 500,
-                                    menubar: false,
-                                    branding: false,
-                                    toolbar: 'undo redo | tinymceai-chat tinymceai-quickactions tinymceai-review | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-                                    tinycomments_mode: 'embedded',
-                                    tinycomments_author: 'Author name',
-                                    mergetags_list: [
-                                        { value: 'First.Name', title: 'First Name' },
-                                        { value: 'Email', title: 'Email' },
-                                    ],
-                                    tinymceai_token_provider: async () => {
-                                        await fetch(`https://demo.api.tiny.cloud/1/ivxbru2lavj7njc3t5fwp5kdevqp02tb1xdwn07pqrkh3g1u/auth/random`, { method: "POST", credentials: "include" });
-                                        return { token: await fetch(`https://demo.api.tiny.cloud/1/ivxbru2lavj7njc3t5fwp5kdevqp02tb1xdwn07pqrkh3g1u/jwt/tinymceai`, { credentials: "include" }).then(r => r.text()) };
-                                    },
-                                    uploadcare_public_key: 'e5b639c656f8697f68b2',
-                                    }}
-                                initialValue="Enter your content here..."
+            <main className="w-full flex flex-col flex-1 bg-[#f8fafc]">
+                {isLoading ? (
+                    <div className="flex flex-1 justify-center items-center">
+                        <ThreeDots
+                            visible={true}
+                            height="150"
+                            width="150"
+                            color="#4fa94d"
+                            radius="9"
+                            ariaLabel="three-dots-loading"
+                            wrapperStyle={{}}
+                            wrapperClass=""
+                        />
+                    </div>
+                ): (
+                    <form className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
+                        {/* Left hand side  */}
+                        <section className="flex flex-1 flex-col gap-8">
+                            {/* Post title */}
+                            <div>
+                                <label htmlFor="postTitle"></label>
+                                <input 
+                                    type="text" 
+                                    name="postTitle" 
+                                    id="postTitle" 
+                                    value={formData.postTitle}
+                                    onChange={handleChange}
+                                    placeholder="Post Title"
+                                    className="w-full px-0 py-3 text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
+                                    required
                                 />
-                        </div>
-                    </section>
-                    
-                    
-                    {/* Right hand side  */}
-                    <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4">
-                        <div className="flex flex-col gap-5">
-                            {/* Post status && Publish */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
-                                <p className="font-bold text-[17px]">Publishing</p>
-                                <div className="flex flex-col gap-1">
-                                    <label htmlFor="postStatus" className="text-[14px] text-gray-700 pt-4 pb-2">Status</label>
-                                    <select 
-                                        name="postStatus" 
-                                        id="postStatus" 
-                                        value={formData.postStatus} 
-                                        onChange={handleChange} 
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
-
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Published</option>
-
-                                    </select>
-                                </div>
-                                <button type="submit" className="p-2 bg-[#4f39f6] text-white w-full rounded-lg mt-4 font-semibold">Edit Post</button>
-                            </div>
-
-                            {/* Post Organisation  */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
-                                <p className="font-bold text-[17px]">Organisation</p>
-                                <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postCategory" className="text-[14px] text-gray-700 pt-4 pb-1">Category</label>
-                                    <select 
-                                        name="postCategory" 
-                                        id="postCategory" 
-                                        value={formData.postCategory}
-                                        onChange={handleChange}
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
-                                        required>
-                                        <option value="" selected disabled>Select Category</option>
-                                        <option value="technology">Technology</option>
-                                        <option value="design">Design</option>
-                                        <option value="buisness">Buisness</option>
-                                        <option value="lifestyle">Lifestyle</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex flex-col mb-1 gap-2">
-                                    <label htmlFor="tags">Tags <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
-                                    <input 
-                                        type="text" 
-                                        name="postTags" 
-                                        id="postTags" 
-                                        value={formData.postTags}
-                                        onChange={handleChange}
-                                        maxLength={30}
-                                        placeholder="e.g. react,nextjs, web" 
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                                        required
-                                    />
-                                    <p className="text-[13px] text-gray-500 ml-2">Seperate with commas</p>
-                                </div>
                             </div>
                             
-                            {/* Post SEO  */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
-                                <p className="font-bold text-[17px]">SEO</p>
+                            {/* Post Cover Image  */}
+                            <div className="flex justify-center relative px-6 py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
+                                <input 
+                                    type="file" 
+                                    name="postCoverImage" 
+                                    id="postCoverImage" 
+                                    onChange={handleChange}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    accept="image/*"
+                                />
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Cover preview" className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
+                                ) : (
+                                    <div id="addImage" className="flex flex-col justify-center items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                                        <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
+                                    </div>
+                                )}
+                            </div>
 
-                                <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500">(Max 15 characters)</span> </label>
-                                    <input 
-                                        type="text" 
-                                        name="postUrl" 
-                                        id="postUrl" 
-                                        value={formData.postUrl}
-                                        onChange={handleChange}
-                                        maxLength={15}
-                                        placeholder="place-url-slug"
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
-                                        required
+                            {/* Post Description  */}
+                            <div>
+                                <Editor
+                                        apiKey = {import.meta.env.VITE_Tiny_API_KEY}
+                                        value={formData.postDescription}
+                                        onEditorChange={(newContent) => {
+                                            setFormData((prevData) => ({
+                                                ...prevData,
+                                                postDescription: newContent
+                                            }));
+                                        }}
+                                        init={{
+                                        plugins: [
+                                            // Core editing features
+                                            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+                                            // Your account includes a free trial of TinyMCE premium features
+                                            // Try the most popular premium features until Apr 19, 2026:
+                                            'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'tinymceai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+                                        ],
+                                        height: 500,
+                                        menubar: false,
+                                        branding: false,
+                                        toolbar: 'undo redo | tinymceai-chat tinymceai-quickactions tinymceai-review | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                                        tinycomments_mode: 'embedded',
+                                        tinycomments_author: 'Author name',
+                                        mergetags_list: [
+                                            { value: 'First.Name', title: 'First Name' },
+                                            { value: 'Email', title: 'Email' },
+                                        ],
+                                        tinymceai_token_provider: async () => {
+                                            await fetch(`https://demo.api.tiny.cloud/1/ivxbru2lavj7njc3t5fwp5kdevqp02tb1xdwn07pqrkh3g1u/auth/random`, { method: "POST", credentials: "include" });
+                                            return { token: await fetch(`https://demo.api.tiny.cloud/1/ivxbru2lavj7njc3t5fwp5kdevqp02tb1xdwn07pqrkh3g1u/jwt/tinymceai`, { credentials: "include" }).then(r => r.text()) };
+                                        },
+                                        uploadcare_public_key: 'e5b639c656f8697f68b2',
+                                        }}
+                                    initialValue="Enter your content here..."
                                     />
+                            </div>
+                        </section>
+                        
+                        
+                        {/* Right hand side  */}
+                        <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4">
+                            <div className="flex flex-col gap-5">
+                                {/* Post status && Publish */}
+                                <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                                    <p className="font-bold text-[17px]">Publishing</p>
+                                    <div className="flex flex-col gap-1">
+                                        <label htmlFor="postStatus" className="text-[14px] text-gray-700 pt-4 pb-2">Status</label>
+                                        <select 
+                                            name="postStatus" 
+                                            id="postStatus" 
+                                            value={formData.postStatus} 
+                                            onChange={handleChange} 
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
+
+                                            <option value="draft">Draft</option>
+                                            <option value="published">Published</option>
+
+                                        </select>
+                                    </div>
+                                    <button 
+                                        type="submit" 
+                                        className="p-2 bg-[#4f39f6] hover:bg-blue-700 text-white w-full rounded-lg mt-4 font-semibold flex justify-center items-center gap-2 h-10 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting && (
+                                            <TailSpin
+                                                visible={true}
+                                                height="20"
+                                                width="20"
+                                                color="#ffffff"
+                                                ariaLabel="tail-spin-loading"
+                                                radius="1"
+                                            />
+                                        )}
+
+                                        {isSubmitting ? "Saving Changes..." : "Edit Post"}
+                                    </button>
                                 </div>
 
-                                <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500">(Max 100 characters)</span></label>
-                                    <textarea 
-                                        type="text" 
-                                        name="postSummary" 
-                                        id="postSummary" 
-                                        value={formData.postSummary}
-                                        onChange={handleChange}
-                                        maxLength={100}
-                                        rows={4}
-                                        placeholder="Brief summary for previews..."
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
-                                        required
-                                    ></textarea>
+                                {/* Post Organisation  */}
+                                <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                                    <p className="font-bold text-[17px]">Organisation</p>
+                                    <div className="flex flex-col gap-1 mb-4">
+                                        <label htmlFor="postCategory" className="text-[14px] text-gray-700 pt-4 pb-1">Category</label>
+                                        <select 
+                                            name="postCategory" 
+                                            id="postCategory" 
+                                            value={formData.postCategory}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
+                                            required>
+                                            <option value="" selected disabled>Select Category</option>
+                                            <option value="technology">Technology</option>
+                                            <option value="design">Design</option>
+                                            <option value="buisness">Buisness</option>
+                                            <option value="lifestyle">Lifestyle</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col mb-1 gap-2">
+                                        <label htmlFor="tags">Tags <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
+                                        <input 
+                                            type="text" 
+                                            name="postTags" 
+                                            id="postTags" 
+                                            value={formData.postTags}
+                                            onChange={handleChange}
+                                            maxLength={30}
+                                            placeholder="e.g. react,nextjs, web" 
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                                            required
+                                        />
+                                        <p className="text-[13px] text-gray-500 ml-2">Seperate with commas</p>
+                                    </div>
+                                </div>
+                                
+                                {/* Post SEO  */}
+                                <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                                    <p className="font-bold text-[17px]">SEO</p>
+
+                                    <div className="flex flex-col gap-1 mb-4">
+                                        <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500">(Max 15 characters)</span> </label>
+                                        <input 
+                                            type="text" 
+                                            name="postUrl" 
+                                            id="postUrl" 
+                                            value={formData.postUrl}
+                                            onChange={handleChange}
+                                            maxLength={15}
+                                            placeholder="place-url-slug"
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 mb-4">
+                                        <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500">(Max 100 characters)</span></label>
+                                        <textarea 
+                                            type="text" 
+                                            name="postSummary" 
+                                            id="postSummary" 
+                                            value={formData.postSummary}
+                                            onChange={handleChange}
+                                            maxLength={100}
+                                            rows={4}
+                                            placeholder="Brief summary for previews..."
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
+                                            required
+                                        ></textarea>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
-                </form>
+                        </section>
+                    </form>
+                )}
             </main>
         </div>
     );
