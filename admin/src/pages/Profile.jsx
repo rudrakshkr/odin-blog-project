@@ -12,6 +12,7 @@ const Profile = ({user, setUser}) => {
     const [errors, setErrors] = useState("");
     const [posts, setPosts] = useState([]);
     const [successMessage, setSuccessMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
@@ -66,27 +67,31 @@ const Profile = ({user, setUser}) => {
 
     useEffect(() => {
         const getPosts = async () => {
-            const res = await fetch('/api/get-posts', {
-                method: 'GET',
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+            try {
+                const res = await fetch('/api/get-posts', {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                })
+
+                const data = await res.json();
+
+                if(!res.ok) {
+                    setErrors(data.message)
                 }
-            })
-
-            const data = await res.json();
-
-            if(!res.ok) {
-                setErrors(data.message)
+                else {
+                    // Successfully got the data!
+                    console.log(data.posts)
+                    setPosts(data.posts)
+                }
+            } 
+            finally {
+                setIsLoading(false);
             }
-            else {
-                // Successfully got the data!
-                console.log(data.posts)
-                setPosts(data.posts)
-            }
-        }
-
-        getPosts();
+        } 
+        getPosts();  
     }, []);
 
     return (
@@ -136,42 +141,48 @@ const Profile = ({user, setUser}) => {
                     )}
 
                     {/* Display posts  */}
-                    <div className="flex flex-col gap-4 mt-2">
-                        {posts.map(post => (
-                            <div 
-                                key={post.id} 
-                                className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 p-5 w-full transition-all hover:shadow-md"
-                            >
-                                {/* Post title  */}
-                                <h3 className="text-gray-900 font-semibold text-base">
-                                    {post.title}
-                                </h3>
+                    {isLoading ? (
+                        <div className="flex justify-center p-10">
+                            <p className="text-gray-500">Loading your posts...</p>
+                        </div>
+                    ): (
+                        <div className="flex flex-col gap-4 mt-2">
+                            {posts.map(post => (
+                                <div 
+                                    key={post.id} 
+                                    className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 p-5 w-full transition-all hover:shadow-md"
+                                >
+                                    {/* Post title  */}
+                                    <h3 className="text-gray-900 font-semibold text-base">
+                                        {post.title}
+                                    </h3>
 
-                                {/* Action Buttons  */}
-                                <div className="flex items-center gap-2 cursor-pointer">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={post.status === "published"}
-                                            onChange={() => changeStatus(post.id, post.status)}
-                                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600 cursor-pointer"
-                                        />
-                                        <span className={`text-sm font-medium ${post.status === "published" ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                            {post.status === "published" ? "Published" : "Draft"}
-                                        </span>
-                                    </label>
-                                    
-                                    <button className="text-sm font-medium text-gray-400 hover:text-black transition-colors" onClick={() => navigate(`/${post.id}/edit-post`)}>
-                                        Edit
-                                    </button>
-                                    
-                                    <button className="text-sm font-medium text-gray-400 hover:text-red-600 transition-colors">
-                                        Delete
-                                    </button>
+                                    {/* Action Buttons  */}
+                                    <div className="flex items-center gap-2 cursor-pointer">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={post.status === "published"}
+                                                onChange={() => changeStatus(post.id, post.status)}
+                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-medium ${post.status === "published" ? 'text-indigo-600' : 'text-gray-400'}`}>
+                                                {post.status === "published" ? "Published" : "Draft"}
+                                            </span>
+                                        </label>
+                                        
+                                        <button className="text-sm font-medium text-gray-400 hover:text-black transition-colors" onClick={() => navigate(`/${post.id}/edit-post`)}>
+                                            Edit
+                                        </button>
+                                        
+                                        <button className="text-sm font-medium text-gray-400 hover:text-red-600 transition-colors">
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>  
             </main>
         </div>
