@@ -255,13 +255,14 @@ const NewPost = ({user, setUser}) => {
                                 </div>
 
                                 <div className="flex flex-col mb-1 gap-2">
-                                    <label htmlFor="tags">Tags</label>
+                                    <label htmlFor="tags">Tags <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
                                     <input 
                                         type="text" 
                                         name="postTags" 
                                         id="postTags" 
                                         value={formData.postTags}
                                         onChange={handleChange}
+                                        maxLength={30}
                                         pattern="^[a-zA-Z0-9\s\.\-]+(?:,[a-zA-Z0-9\s\.\-]+)*$"
                                         title="Tags must be separated by commas (e.g., react, next.js, web-dev)"
                                         placeholder="e.g. react,nextjs, web" 
