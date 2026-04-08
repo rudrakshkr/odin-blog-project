@@ -1,8 +1,9 @@
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { useLocation } from "react-router"
 import { useState, useEffect } from "react";
 
 const Profile = ({user, setUser}) => {
+    const navigate = useNavigate();
     const token = localStorage.getItem("jwtToken");
     const location = useLocation();
     const postSuccessMessage = location.state?.postSuccessMessage;
@@ -160,7 +161,7 @@ const Profile = ({user, setUser}) => {
                                         </span>
                                     </label>
                                     
-                                    <button className="text-sm font-medium text-gray-400 hover:text-indigo-600 transition-colors">
+                                    <button className="text-sm font-medium text-gray-400 hover:text-black transition-colors" onClick={() => navigate(`/${post.id}/edit-post`)}>
                                         Edit
                                     </button>
                                     

@@ -1,12 +1,14 @@
-import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { useState, useEffect } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 
-const NewPost = ({user, setUser}) => {
+const EditPost = ({ user, setUser }) => {
     const token = localStorage.getItem("jwtToken");
-    const [errors, setErrors] = useState([]);
     const navigate = useNavigate();
+    const {postId} = useParams();
 
+    const [errors, setErrors] = useState('');
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [formData, setFormData] = useState({
         postTitle: '', 
         postCoverImage: '', 
@@ -15,22 +17,60 @@ const NewPost = ({user, setUser}) => {
         postCategory: '',
         postTags: '',
         postUrl: '',
-        postSummary: '',
-        user: user
+        postSummary: ''
     })
+
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                const resPost = await fetch(`/api/${postId}/getPostById`, {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                })
+
+                const data = await resPost.json();
+                
+                if(resPost.ok) {
+                    setFormData({
+                        postTitle: data.post.title || '',
+                        postCoverImage: '',
+                        postDescription: data.post.description || '',
+                        postStatus: data.post.status || 'draft',
+                        postCategory: data.post.category || '',
+                        postTags: data.post.tags || '',
+                        postUrl: data.post.urlSlug || '',
+                        postSummary: data.post.summary || ''
+                    });
+
+                    if(data.post.coverImage) {
+                        setPreviewUrl(data.post.coverImage);
+                    }
+                }
+            } catch(err) {
+                console.error("Failed to fetch post", err);
+            }
+        }
+
+        fetchPost();
+    }, [postId, token])
+
+    console.log(formData);
 
     const handleChange = (e) => {
         const {name, value} = e.target;
 
-        if(name === "postCoverImage") {
-            const file = e.target.files[0];
-            if(file) {
-                const imagePreview = document.querySelector("#imagePreview");
-                const addImage = document.querySelector("#addImage");
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }))
 
-                imagePreview.style.display = "block";
-                imagePreview.src = URL.createObjectURL(file);
-                addImage.style.display = "none";
+        if(name === "postCoverImage") {
+            const [file] = e.target.files
+            if(file) {
+                setPreviewUrl(URL.createObjectURL(file));
 
                 setFormData(prevState => ({
                     ...prevState,
@@ -38,25 +78,12 @@ const NewPost = ({user, setUser}) => {
                 }))
             }
         }
-        else {
-            setFormData(prevState => ({
-                ...prevState,
-                [name]: value
-            }))
-        }
     }
 
     const handlePostSubmit = async (e) => {
         e.preventDefault();
 
-        const content = formData.postDescription;
-        if(!content || content.trim() === "" || content === "<p></p>") {
-            alert("Please write some content for your post to submit!");
-            return;
-        }
-
         const submitData = new FormData();
-
         submitData.append('postTitle', formData.postTitle);
         submitData.append('postDescription', formData.postDescription);
         submitData.append('postStatus', formData.postStatus);
@@ -65,48 +92,34 @@ const NewPost = ({user, setUser}) => {
         submitData.append('postUrl', formData.postUrl);
         submitData.append('postSummary', formData.postSummary);
 
-        if(formData.postCoverImage) {
+        if (formData.postCoverImage) {
             submitData.append('postCoverImage', formData.postCoverImage);
         }
 
         try {
-            const res = await fetch('/api/submit-post', {
-                method: 'POST',
+            const res = await fetch(`/api/${postId}/edit-post`, {
+                method: 'PUT',
                 headers: {
                     "Authorization": `Bearer ${token}`
                 },
                 body: submitData
-            })
+            });
+            
+            const data = await res.json()
 
-            if(res.status === 403 || res.status === 401) {
-                console.error("Session expired. Logging out.");
-
-                localStorage.removeItem('jwtToken');
-
-                setUser({auth: false, name: null});
-
-                navigate('/login', {
-                    state: {successMessage: "Session expired! Please log in again."}
-                })
-                return;
-            }
-
-            if(!res.ok) {
-                setErrors(["Something went wrong. Please try again."])
-            }
-            else {
-                // Success
-                // Redirect to Profile page
+            if(res.ok) {
                 navigate('/profile', {
-                    state: {postSuccessMessage: "Post has been created!"}
+                    state: {postSuccessMessage: "Post has been edited!"}
                 });
             }
-        }
-        catch(err) {
-            console.error("Fetch error: ", err);
-            setErrors(["Failed to connect to the server."])
+            else {
+                setErrors(data.message);
+            }
+        } catch(err) {
+            setErrors("Network error.")
         }
     }
+
     return (
         <div className="w-full min-h-screen flex flex-col">
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 z-10 relative">
@@ -134,7 +147,7 @@ const NewPost = ({user, setUser}) => {
             </nav>
             <main className="w-full flex-1 bg-[#f8fafc]">
                 {/* Post title */}
-                <form action="/api/submit-post" method="POST" className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
+                <form className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
                     {/* Left hand side  */}
                     <section className="flex flex-1 flex-col gap-8">
                         {/* Post title */}
@@ -157,17 +170,19 @@ const NewPost = ({user, setUser}) => {
                             <input 
                                 type="file" 
                                 name="postCoverImage" 
-                                id="postCoverImage"
+                                id="postCoverImage" 
                                 onChange={handleChange}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 accept="image/*"
-                                required
                             />
-                            <img id="imagePreview" src="#" alt="your image" style={{display: "none"}} className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
-                            <div id="addImage" className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
-                                <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
-                            </div>
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Cover preview" className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
+                            ) : (
+                                <div id="addImage" className="flex flex-col justify-center items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                                    <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Post Description  */}
@@ -231,7 +246,7 @@ const NewPost = ({user, setUser}) => {
 
                                     </select>
                                 </div>
-                                <button type="submit" className="p-2 bg-[#4f39f6] text-white w-full rounded-lg mt-4 font-semibold">Publish</button>
+                                <button type="submit" className="p-2 bg-[#4f39f6] text-white w-full rounded-lg mt-4 font-semibold">Edit Post</button>
                             </div>
 
                             {/* Post Organisation  */}
@@ -246,7 +261,7 @@ const NewPost = ({user, setUser}) => {
                                         onChange={handleChange}
                                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
                                         required>
-                                        <option value="" disabled>Select Category</option>
+                                        <option value="" selected disabled>Select Category</option>
                                         <option value="technology">Technology</option>
                                         <option value="design">Design</option>
                                         <option value="buisness">Buisness</option>
@@ -307,7 +322,7 @@ const NewPost = ({user, setUser}) => {
                 </form>
             </main>
         </div>
-    )
-}
+    );
+};
 
-export default NewPost;
+export default EditPost;

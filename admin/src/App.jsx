@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { useEffect, useState } from 'react';
-import { Editor } from '@tinymce/tinymce-react';
+import EditPost from './pages/EditPost';
 
 import './index.css';
 
@@ -58,6 +58,14 @@ function App() {
             path='/new-post'
             element={
               user.auth ? <NewPost user={user} setUser={setUser} /> : <Navigate to="/login" />
+            }
+          />
+
+          {/* Protected Route: Edit Post */}
+          <Route 
+            path='/:postId/edit-post'
+            element={
+              user.auth ? <EditPost user={user} /> : <Navigate to="/login" />
             }
           />
           
