@@ -42,6 +42,19 @@ const NewPost = ({user, setUser}) => {
         if(name === "postCoverImage") {
             const file = e.target.files[0];
             if(file) {
+                const maxSizeInBytes = 10 * 1024 * 1024;
+
+                if(file.size > maxSizeInBytes) {
+                    setErrors("Image is too large! Please select a file smaller than 10MB.");
+
+                    e.target.value = null;
+
+                    window.scrollTo({top: 0, behavior: 'smooth'})
+
+                    return;
+                }
+
+                setErrors("");
                 const imagePreview = document.querySelector("#imagePreview");
                 const addImage = document.querySelector("#addImage");
 
@@ -179,28 +192,35 @@ const NewPost = ({user, setUser}) => {
                                 id="postTitle" 
                                 value={formData.postTitle}
                                 onChange={handleChange}
+                                maxLength={50}
                                 placeholder="Post Title"
                                 className="w-full px-0 py-3 text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
                                 required
                             />
+                            <p className="text-sm text-slate-500">Max 50 characters</p>
                         </div>
                         
-                        {/* Post Cover Image  */}
-                        <div className="flex justify-center relative px-6 py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
-                            <input 
-                                type="file" 
-                                name="postCoverImage" 
-                                id="postCoverImage"
-                                onChange={handleChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                accept="image/*"
-                                required
-                            />
-                            <img id="imagePreview" src="#" alt="your image" style={{display: "none"}} className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
-                            <div id="addImage" className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
-                                <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
+                        {/* Cover Image */}
+                        <div className="flex flex-col gap-2 w-full">
+                            {/* Dash Box */}
+                            <div className="flex justify-center relative px-6 py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
+                                <input 
+                                    type="file" 
+                                    name="postCoverImage" 
+                                    id="postCoverImage"
+                                    onChange={handleChange}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    accept="image/*"
+                                    required
+                                />
+                                <img id="imagePreview" src="#" alt="your image" style={{display: "none"}} className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
+                                <div id="addImage" className="flex flex-col justify-center items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                                    <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
+                                </div>
                             </div>
+                            <p className="text-sm text-slate-500 ml-1">Max 10MB</p>
+                            
                         </div>
 
                         {/* Post Description  */}
