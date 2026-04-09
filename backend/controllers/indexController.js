@@ -283,6 +283,24 @@ async function getPostById(req, res, next) {
     }
 }
 
+async function deletePost(req, res, next) {
+    try {
+        const {postId} = req.params;
+
+        await prisma.posts.delete({
+            where: {
+                id: parseInt(postId)
+            }
+        })
+
+        return res.json({message: "Post deleted"});
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 
 function logout(req, res) {
     return res.sendStatus(200);
@@ -297,5 +315,6 @@ module.exports = {
     togglePost,
     getPostById,
     editPostPut,
+    deletePost,
     logout
 }

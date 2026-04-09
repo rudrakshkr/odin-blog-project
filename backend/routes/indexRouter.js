@@ -9,6 +9,7 @@ const {
     togglePost,
     getPostById,
     editPostPut,
+    deletePost,
     logout
 } = require("../controllers/indexController");
 
@@ -32,5 +33,6 @@ indexRouter.get('/api/get-posts', verifyToken, getPosts);
 indexRouter.post('/api/posts/:postId/toggle', verifyToken, togglePost);
 indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
 indexRouter.put('/api/:postId/edit-post', verifyToken, upload.single('postCoverImage'), editPostPut);
+indexRouter.delete('/api/:postId/delete-post', verifyToken, deletePost);
 
 module.exports = indexRouter;
