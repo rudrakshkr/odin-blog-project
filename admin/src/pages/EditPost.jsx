@@ -412,7 +412,7 @@ const EditPost = ({ user, setUser }) => {
                                                 maxLength={100}
                                                 rows={4}
                                                 placeholder="Brief summary for previews..."
-                                                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
+                                                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none" 
                                                 required
                                             ></textarea>
                                         </div>
