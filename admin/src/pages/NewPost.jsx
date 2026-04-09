@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
+import { TailSpin } from "react-loader-spinner";
 
 const NewPost = ({user, setUser}) => {
     const token = localStorage.getItem("jwtToken");
-    const [errors, setErrors] = useState([]);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -18,6 +18,8 @@ const NewPost = ({user, setUser}) => {
         postSummary: '',
         user: user
     })
+    const [errors, setErrors] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
@@ -85,6 +87,7 @@ const NewPost = ({user, setUser}) => {
         }
 
         try {
+            setIsSubmitting(true);
             const res = await fetch('/api/submit-post', {
                 method: 'POST',
                 headers: {
@@ -261,7 +264,23 @@ const NewPost = ({user, setUser}) => {
 
                                     </select>
                                 </div>
-                                <button type="submit" className="p-2 bg-[#4f39f6] text-white w-full rounded-lg mt-4 font-semibold">Publish</button>
+                                <button 
+                                    type="submit" 
+                                    className="p-2 bg-[#4f39f6] hover:bg-blue-700 text-white w-full rounded-lg mt-4 font-semibold flex justify-center items-center gap-2 h-10 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting && (
+                                                <TailSpin
+                                            visible={true}
+                                            height="20"
+                                            width="20"
+                                            color="#ffffff"
+                                            ariaLabel="tail-spin-loading"
+                                            radius="1"
+                                        />
+                                    )}
+                                    {isSubmitting ? "Publishing..." : "Publish"}
+                                </button>
                             </div>
 
                             {/* Post Organisation  */}

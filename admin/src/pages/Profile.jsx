@@ -18,6 +18,7 @@ const Profile = ({user, setUser}) => {
     const [isLoading, setIsLoading] = useState(() => {
         return sessionStorage.getItem("cachedPosts") ? false : true;
     });
+    const [deletingId, setDeletingId] = useState(false);
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
@@ -67,6 +68,44 @@ const Profile = ({user, setUser}) => {
             }
         } catch(err) {
             setErrors("Network error while updating status.")
+        }
+    }
+    
+    const deletePost = async (postId) => {
+        const isConfirmed = window.confirm("Are you sure you want to permanently delete this post? This cannot be undone.");
+        if(!isConfirmed) return;
+
+        try {
+            setDeletingId(postId);
+
+            const res = await fetch(`/api/${postId}/delete-post`, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+
+            const data = await res.json();
+
+            if(!res.ok) {
+                setErrors(data.message);
+            }
+            else {
+                setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+
+                const updatedCache = posts.filter(post => post.id !== postId);
+                sessionStorage.setItem("cachedPosts", JSON.stringify(updatedCache));
+                
+                setSuccessMessage(`Success: Post has been deleted`);
+                setTimeout(() => setSuccessMessage(""), 3000);
+            }
+        }
+        catch(err) {
+            setErrors("Network error while deleting post.");
+        }
+        finally {
+            setDeletingId(null);
         }
     }
 
@@ -192,8 +231,12 @@ const Profile = ({user, setUser}) => {
                                             Edit
                                         </button>
                                         
-                                        <button className="text-sm font-medium text-gray-400 hover:text-red-600 transition-colors">
-                                            Delete
+                                        <button 
+                                            className="text-sm font-medium text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50" 
+                                            onClick={() => deletePost(post.id)}
+                                            disabled={deletingId === post.id}
+                                        >
+                                            {deletingId === post.id ? "Deleting..." : "Delete"}
                                         </button>
                                     </div>
                                 </div>
