@@ -348,6 +348,8 @@ const EditPost = ({ user, setUser }) => {
                                                 id="postTags" 
                                                 value={formData.postTags}
                                                 onChange={handleChange}
+                                                pattern="^[a-zA-Z0-9\s\.\-]+(?:,[a-zA-Z0-9\s\.\-]+)*$"
+                                                title="Tags must be separated by commas (e.g., react, next.js, web-dev) and no special characters are allowed"
                                                 maxLength={30}
                                                 placeholder="e.g. react,nextjs, web" 
                                                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
@@ -369,6 +371,8 @@ const EditPost = ({ user, setUser }) => {
                                                 id="postUrl" 
                                                 value={formData.postUrl}
                                                 onChange={handleChange}
+                                                pattern="^[a-zA-Z0-9\-]+$"
+                                                title="URL slug can only contain letters, numbers, and hyphens (no spaces or special characters)."
                                                 maxLength={15}
                                                 placeholder="place-url-slug"
                                                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
