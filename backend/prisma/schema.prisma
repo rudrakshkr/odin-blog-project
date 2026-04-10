@@ -31,7 +31,7 @@ model Posts {
   tags String[]
   urlSlug String @unique
   summary String
-  date DateTime @default(now())
+  date String
 
   userId Int
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)

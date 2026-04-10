@@ -58,7 +58,7 @@ function verifyToken(req, res, next) {
                 return res.sendStatus(403);
             }
             
-            req.user = { username: data.username, verified: true };
+            req.user = { username: data.username, role: data.role, verified: true };
             return next();
         });
     } else {
@@ -124,6 +124,11 @@ async function submitPost(req, res, next) {
             postSummary
         } = req.body;
 
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+
         const tokenUsername = req.user.username;
 
         const coverImagePath = req.file ? req.file.path : null;
@@ -150,7 +155,8 @@ async function submitPost(req, res, next) {
                 tags: formattedTags,
                 urlSlug: postUrl,
                 summary: postSummary,
-                userId: getUser.id
+                userId: getUser.id,
+                date: `${dd}/${mm}/${yyyy}`
             }
         })
 
@@ -176,6 +182,11 @@ async function editPostPut(req, res, next) {
             postSummary
         } = req.body;
 
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+
         const tokenUsername = req.user.username;
 
         const getUser = await prisma.users.findUnique({
@@ -198,7 +209,8 @@ async function editPostPut(req, res, next) {
             category: postCategory,
             tags: formattedTags,
             urlSlug: postUrl,
-            summary: postSummary
+            summary: postSummary,
+            date: `${dd}/${mm}/${yyyy}`
         }
 
         if(req.file) {
@@ -222,7 +234,7 @@ async function editPostPut(req, res, next) {
 
 async function getPosts(req, res, next) {
     try {
-        const tokenUsername = req.user.username;
+        const tokenUsername = 's';
 
         const getUser = await prisma.users.findUnique({
             where: {
