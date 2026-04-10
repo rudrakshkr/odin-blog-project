@@ -3,6 +3,7 @@ import './index.css';
 import { useState, useEffect } from 'react';
 import LoginPage from './pages/Login';
 import Profile from './pages/Profile';
+import SignupForm from './pages/SignIn';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -29,6 +30,14 @@ function App() {
               user.auth ? <Navigate to="/profile" /> : <LoginPage setUser={setUser} />
             } 
           />
+          
+          {/* Public Route: Sign Up */}
+          <Route 
+            path="/sign-up" 
+            element={
+              user.auth ? <Navigate to="/profile" /> : <SignupForm />
+            } 
+          />
 
           {/* Protected Route: Profile */}
           <Route 
@@ -38,7 +47,7 @@ function App() {
             } 
           />
 
-          {/* Catch-all: Redirects any unknown URLs to the right place */}
+          {/* Catch-all: Redirects unknown URL's*/} 
           <Route 
             path="*" 
             element={<Navigate to={user.auth ? "/profile" : "/login"} />} 
