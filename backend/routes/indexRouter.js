@@ -2,6 +2,7 @@ const {Router} = require("express");
 const indexRouter = Router();
 const {
     logInPost, 
+    verifyAdmin,
     verifyToken, 
     signUpPagePost,
     getPosts,
@@ -28,11 +29,11 @@ indexRouter.post('/api/sign-up', signUpPagePost);
 indexRouter.get('/api/logout', logout);
 
 // Protected Routes
-indexRouter.post('/api/submit-post', verifyToken, upload.single('postCoverImage'), submitPost);
+indexRouter.post('/api/submit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), submitPost);
 indexRouter.get('/api/get-posts', verifyToken, getPosts);
 indexRouter.post('/api/posts/:postId/toggle', verifyToken, togglePost);
 indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
-indexRouter.put('/api/:postId/edit-post', verifyToken, upload.single('postCoverImage'), editPostPut);
-indexRouter.delete('/api/:postId/delete-post', verifyToken, deletePost);
+indexRouter.put('/api/:postId/edit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), editPostPut);
+indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deletePost);
 
 module.exports = indexRouter;

@@ -3,8 +3,6 @@ const bcrypt = require("bcryptjs");
 const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
-const { post } = require("../routes/indexRouter.js");
-const { token } = require("morgan");
 
 async function logInPost(req, res) {
     try {
@@ -24,8 +22,8 @@ async function logInPost(req, res) {
             let match = await bcrypt.compare(password, user.password);
             
             if (match) {
-                token = jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: '7d' });
-                return res.json({ token, username: user.username });
+                token = jwt.sign({ username: user.username, role: user.role }, process.env.SECRET_KEY, { expiresIn: '7d' });
+                return res.json({ token, username: user.username, role: user.role });
             } else {
                 return res.status(401).json({ message: "Invalid password" });
             }
@@ -35,6 +33,15 @@ async function logInPost(req, res) {
     } catch(err) {
         console.error("Login Error:", err);
         return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+function verifyAdmin(req, res, next) {
+    if(req.user && req.user.role === "ADMIN") {
+        next();
+    }
+    else {
+        return res.status(403).json({message: "Access denied. Admins only."});
     }
 }
 
@@ -308,6 +315,7 @@ function logout(req, res) {
 
 module.exports = {
     logInPost,
+    verifyAdmin,
     verifyToken,
     signUpPagePost,
     submitPost,

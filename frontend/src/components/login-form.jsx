@@ -36,16 +36,9 @@ export function LoginForm({ className, setUser, ...props }) {
         if (res.status === 401) setErrors('Invalid credentials');
         else setErrors(data.message || 'Please try again.');
       } else {
-        // If user not admin 
-        if(data.role !== "ADMIN") {
-          setErrors("Access denied. Admin previleges required.");
-          return;
-        }
-
-        // If they admin, let them in
         localStorage.setItem('jwtToken', data.token);
         if (setUser) {
-          setUser({ auth: true, name: data.username, role: data.role });
+          setUser({ auth: true, name: data.username });
         }
       }
     } catch (err) {
