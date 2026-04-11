@@ -18,6 +18,7 @@ const EditPost = ({ user, setUser }) => {
         postDescription: '',
         postStatus: 'draft',
         postCategory: '',
+        postReadMin: 0,
         postTags: '',
         postUrl: '',
         postSummary: ''
@@ -60,6 +61,7 @@ const EditPost = ({ user, setUser }) => {
                         postDescription: data.post.description || '',
                         postStatus: data.post.status || 'draft',
                         postCategory: data.post.category || '',
+                        postReadMin: data.post.readMin || 0,
                         postTags: data.post.tags || '',
                         postUrl: data.post.urlSlug || '',
                         postSummary: data.post.summary || ''
@@ -124,6 +126,7 @@ const EditPost = ({ user, setUser }) => {
         submitData.append('postDescription', formData.postDescription);
         submitData.append('postStatus', formData.postStatus);
         submitData.append('postCategory', formData.postCategory);
+        submitData.append('postReadMin', formData.postReadMin);
         submitData.append('postTags', formData.postTags);
         submitData.append('postUrl', formData.postUrl);
         submitData.append('postSummary', formData.postSummary);
@@ -377,6 +380,22 @@ const EditPost = ({ user, setUser }) => {
                                                 required
                                             />
                                             <p className="text-[13px] text-gray-500 ml-2">Seperate with commas</p>
+                                        </div>
+
+                                        <div className="flex flex-col mb-1 gap-2">
+                                            <label htmlFor="tags">Read Time <span className="text-[13px] text-slate-500">(In Minutes)</span></label>
+                                            <input 
+                                                type="number"
+                                                name="postReadMin" 
+                                                id="postReadMin" 
+                                                value={formData.postReadMin}
+                                                onChange={handleChange}
+                                                max={60}
+                                                placeholder="5,10,15..." 
+                                                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                                                required
+                                            />
+                                            <p className="text-[13px] text-gray-500 ml-2">Max 60 min</p>
                                         </div>
                                     </div>
                                     
