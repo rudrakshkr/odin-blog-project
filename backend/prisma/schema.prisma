@@ -27,6 +27,7 @@ model Posts {
   description String
   coverImage String
   status String
+  readMin Int
   category String
   tags String[]
   urlSlug String @unique

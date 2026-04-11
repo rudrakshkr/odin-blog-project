@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Posts" ADD COLUMN     "readMin" INTEGER NOT NULL DEFAULT 5;

@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
+const { parse } = require("dotenv");
 
 async function logInPost(req, res) {
     try {
@@ -124,6 +125,8 @@ async function submitPost(req, res, next) {
             postSummary
         } = req.body;
 
+        const postReadMin = parseInt(req.body.postReadMin, 10);
+
         const d = new Date();
         const dd = String(d.getDate()).padStart(2, '0');
         const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -152,6 +155,7 @@ async function submitPost(req, res, next) {
                 description: postDescription,
                 status: postStatus,
                 category: postCategory,
+                readMin: postReadMin,
                 tags: formattedTags,
                 urlSlug: postUrl,
                 summary: postSummary,
@@ -182,6 +186,8 @@ async function editPostPut(req, res, next) {
             postSummary
         } = req.body;
 
+        const postReadMin = parseInt(req.body.postReadMin, 10);
+
         const d = new Date();
         const dd = String(d.getDate()).padStart(2, '0');
         const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -207,6 +213,7 @@ async function editPostPut(req, res, next) {
             description: postDescription,
             status: postStatus,
             category: postCategory,
+            readMin: postReadMin,
             tags: formattedTags,
             urlSlug: postUrl,
             summary: postSummary,
