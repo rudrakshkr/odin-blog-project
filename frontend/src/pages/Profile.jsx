@@ -123,38 +123,58 @@ const Profile = ({user, setUser}) => {
                 {/* Display posts  */}
                 {isLoading ? (
                     <div className="flex justify-center p-10">
-                        <p className="text-gray-500">Loading your posts...</p>
+                        <p className="text-slate-500 font-medium animate-pulse">Loading your posts...</p>
                     </div>
                 ): (
-                    <div className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-10">
+                    <div className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-10">
                         {posts.map(post => (
-                            <div className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1" key={post.id}>
-                                <div className="w-full h-56 bg-gradient-to-br from-indigo-100 to-indigo-600 flex items-center justify-center shrink-0">
-                                    <img src={post.coverImage} alt="Cover Image" className="w-full h-full object-fill" />
+                            <div className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1.5 group" key={post.id}>
+                                <div className="w-full aspect-[16/9] bg-slate-100 overflow-hidden shrink-0">
+                                    {/* Cover Image  */}
+                                    <img 
+                                        src={post.coverImage} 
+                                        alt="Cover Image" 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                                    />
                                 </div>
                                 
-                                {/* Content Area */}
-                                <div className="p-5 flex flex-col flex-grow gap-3">
+                                <div className="p-6 flex flex-col flex-grow gap-3.5">
                                     
-                                    {/* Category */}
-                                    <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
+                                    {/* Category  */}
+                                    <div className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
                                         {post.category}
                                     </div>
                                     
-                                    {/* Title */}
-                                    <h3 className="font-bold text-lg text-slate-900 leading-snug line-clamp-2">
+                                    {/* Title  */}
+                                    <h3 className="font-extrabold text-xl text-slate-900 leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors duration-200">
                                         {post.title}
                                     </h3>
-                                    
-                                    {/* Summary */}
-                                    <p className="text-sm text-slate-600 line-clamp-3">
+
+                                    {/* Summary      */}
+                                    <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
                                         {post.summary}
                                     </p>
+
+                                    {/* Tags  */}
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {post.tags.map((tag, index) => (
+                                                <span 
+                                                    key={index} 
+                                                    className="px-2.5 py-1 text-[11px] font-semibold bg-indigo-50 text-indigo-700 rounded-md"
+                                                >
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                     
-                                    {/* Date  */}
-                                    <div className="mt-auto pt-4 flex items-center justify-between text-xs text-slate-500 font-medium">
-                                        <span className="text-slate-900">{post.date}</span>
-                                        <span>5 min read</span>
+                                    {/* Date and Read Time  */}
+                                    <div className="mt-auto pt-5 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500 font-medium">
+                                        <span className="text-slate-800">{post.date}</span>
+                                        <span className="flex items-center gap-1.5">
+                                            {post.readMin || 5} min read
+                                        </span>
                                     </div>
 
                                 </div>
