@@ -128,7 +128,12 @@ const Profile = ({user, setUser}) => {
                 ): (
                     <div className="w-full max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-10">
                         {posts.map(post => (
-                            <div className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1.5 group" key={post.id}>
+                            <Link 
+                                className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1.5 group" 
+                                key={post.id}
+                                to={`/blogs/${post.urlSlug}`}
+                                // onClick={() => handlePostClick(post.id)}
+                            >
                                 <div className="w-full aspect-[16/9] bg-slate-100 overflow-hidden shrink-0">
                                     {/* Cover Image  */}
                                     <img 
@@ -178,7 +183,7 @@ const Profile = ({user, setUser}) => {
                                     </div>
 
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

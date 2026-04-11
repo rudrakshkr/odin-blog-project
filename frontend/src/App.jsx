@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import LoginPage from './pages/Login';
 import Profile from './pages/Profile';
 import SignupForm from './pages/SignIn';
+import ShowPost from './pages/ShowPost';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -37,6 +38,14 @@ function App() {
             element={
               user.auth ? <Navigate to="/profile" /> : <SignupForm />
             } 
+          />
+
+          {/* Protected Route: Blog posts  */}
+          <Route 
+            path="/blogs/:postSlug"
+            element= {
+              user.auth ? <ShowPost user={user} /> : <Navigate to="/login" />
+            }
           />
 
           {/* Protected Route: Profile */}
