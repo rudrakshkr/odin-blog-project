@@ -239,6 +239,28 @@ async function editPostPut(req, res, next) {
     }
 }
 
+async function getUserById(req, res, next) {
+    try {
+        const {userId} = req.params;
+
+        const user = await prisma.users.findUnique({
+            where: {
+                id: parseInt(userId)
+            }
+        })
+
+        if(!user) {
+            return res.json({message: "Couldn't find user!"})
+        }
+
+        return res.json({user: user});
+    }
+    catch(err) {
+        console.error("Prisma Error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 async function getPosts(req, res, next) {
     try {
         const tokenUsername = 's';
@@ -309,6 +331,28 @@ async function getPostById(req, res, next) {
     }
 }
 
+async function getPostBySlug(req, res, next) {
+    try {
+        const {postSlug} = req.params;
+
+        const getPost = await prisma.posts.findUnique({
+            where: {
+                urlSlug: postSlug
+            }
+        })
+
+        if(!getPost) {
+            return res.json({message: "Failed to fetch post!"})
+        }
+
+        return res.json({post: getPost})
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 async function deletePost(req, res, next) {
     try {
         const {postId} = req.params;
@@ -336,11 +380,13 @@ module.exports = {
     logInPost,
     verifyAdmin,
     verifyToken,
+    getUserById,
     signUpPagePost,
     submitPost,
     getPosts,
     togglePost,
     getPostById,
+    getPostBySlug,
     editPostPut,
     deletePost,
     logout

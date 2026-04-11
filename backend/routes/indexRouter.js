@@ -9,6 +9,8 @@ const {
     submitPost,
     togglePost,
     getPostById,
+    getUserById,
+    getPostBySlug,
     editPostPut,
     deletePost,
     logout
@@ -28,12 +30,16 @@ indexRouter.post('/api/login', logInPost);
 indexRouter.post('/api/sign-up', signUpPagePost);
 indexRouter.get('/api/logout', logout);
 
-// Protected Routes
+// Admin and Token Protected Routes
 indexRouter.post('/api/submit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), submitPost);
 indexRouter.get('/api/get-posts', verifyToken, getPosts);
 indexRouter.post('/api/posts/:postId/toggle', verifyToken, verifyAdmin, togglePost);
-indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
 indexRouter.put('/api/:postId/edit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), editPostPut);
 indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deletePost);
+
+// Token Protected Routes
+indexRouter.get('/api/:userId/getUserById', verifyToken, getUserById);
+indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
+indexRouter.get('/api/:postSlug/getPostBySlug', verifyToken, getPostBySlug);
 
 module.exports = indexRouter;
