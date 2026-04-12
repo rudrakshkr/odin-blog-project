@@ -44,7 +44,7 @@ function App() {
           <Route 
             path="/blogs/:postSlug"
             element= {
-              user.auth ? <ShowPost user={user} /> : <Navigate to="/login" />
+              user.auth ? <ShowPost user={user} setUser={setUser}/> : <Navigate to="/login" />
             }
           />
 

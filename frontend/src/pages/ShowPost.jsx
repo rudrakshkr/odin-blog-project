@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router";
 import { ThreeDots } from "react-loader-spinner";
 import DOMPurify from 'dompurify';
 
-const ShowPost = ({user}) => {
+const ShowPost = ({user, setUser}) => {
     const token = localStorage.getItem("jwtToken");
     const {postSlug} = useParams();
 
@@ -19,11 +19,13 @@ const ShowPost = ({user}) => {
         postSummary: '',
         postAuthor: '',
         postDate: '',
+        userId: null,
     })
+    const [newComment, setNewComment] = useState({name: '', comment: '', date: ''});
+    const [comments, setComments] = useState({name: '', comment: '', date: ''});
+    const [successMessage, setSuccessMessage] = useState("");
     const [errors, setErrors] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-
-    console.log(user)
 
     useEffect(() => {
         const getPost = async () => {
@@ -63,7 +65,8 @@ const ShowPost = ({user}) => {
                     postTags: data.post.tags || '',
                     postUrl: data.post.urlSlug || '',
                     postSummary: data.post.summary || '',
-                    postDate: formattedDate || ''
+                    postDate: formattedDate || '',
+                    userId: data.post.userId || null
                 });
                 
                 
@@ -100,6 +103,89 @@ const ShowPost = ({user}) => {
         getPost();
     }, [token])
 
+    useEffect(() => {
+        async function getComments() {
+            try {
+                const res = await fetch(`/api/getComments`, {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                })
+
+                if(!res.ok) {
+                    setErrors("Failed to fetch comments.");
+                    return;
+                }
+
+                const data = await res.json();
+
+                const formattedComments = data.comments.map(comment => {
+                    if (!comment.date) return comment; 
+
+                    const rawDate = comment.date;
+                    const [day, month, year] = rawDate.split('/');
+                    const dateObj = new Date(year, month - 1, day);
+                    
+                    const formattedDate = dateObj.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+
+                    return {
+                        ...comment,
+                        date: formattedDate
+                    };
+                });
+
+
+                setComments(formattedComments);
+            }
+            catch(err) {
+                console.error("Failed to post comment: ", err);
+                setErrors("Internal server error. Please refresh")
+            }
+        }
+
+        getComments();
+    }, [postSlug])
+
+    async function handleCommentSubmit(e) {
+        e.preventDefault();
+
+        const postAuthorId = formData.userId;
+
+        try {
+            const res = await fetch(`/api/${postAuthorId}/post-comment`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(newComment)
+            })
+
+            if(!res.ok) {
+                setErrors("Failed to post comment.")
+                return;
+            }
+
+            setSuccessMessage("Success: Comment is now published!");
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+
+            setNewComment({name: '', comment: ''});
+        }
+        catch(err) {
+            console.error("Failed to post comment: ", err);
+            setErrors("Internal server error. Please refresh")
+        }
+    }
+
+
     const handleLogout = async (e) => {
         e.preventDefault(e)
         const res = await fetch('/api/logout', {
@@ -113,6 +199,15 @@ const ShowPost = ({user}) => {
             localStorage.removeItem('jwtToken');
             setUser({auth: false, name: ''})
         }
+    }
+
+    const handleChange = async (e) => {
+        const {name, value} = e.target;
+
+        setNewComment(prevState => ({
+            ...prevState,
+            [name]: value
+        }))
     }
 
     return (
@@ -215,11 +310,17 @@ const ShowPost = ({user}) => {
 
                                 <hr className="border-slate-200 mt-12 mb-12" />
 
+                                {successMessage && (
+                                    <div className="p-4 mb-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm text-center font-medium">
+                                        {successMessage}
+                                    </div>
+                                )}
+
                                 {/* Comment Section */}
                                 <section className="pb-10">
                                     <h2 className="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Leave a Comment</h2>
                                     
-                                    <form className="flex flex-col gap-5 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/60">
+                                    <form className="flex flex-col gap-5 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/60" onSubmit={handleCommentSubmit}>
                                         
                                         <div className="flex flex-col gap-1.5">
                                             <label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">Name</label>
@@ -227,6 +328,8 @@ const ShowPost = ({user}) => {
                                                 type="text" 
                                                 id="name" 
                                                 name="name"
+                                                value={newComment.name}
+                                                onChange={handleChange}
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all text-slate-900"
                                                 placeholder="Your Name"
                                                 required
@@ -238,6 +341,8 @@ const ShowPost = ({user}) => {
                                             <textarea 
                                                 id="comment" 
                                                 name="comment"
+                                                value={newComment.comment}
+                                                onChange={handleChange}
                                                 rows="5" 
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all resize-y text-slate-900"
                                                 placeholder="What are your thoughts?"
@@ -247,12 +352,47 @@ const ShowPost = ({user}) => {
 
                                         <button 
                                             type="submit" 
-                                            className="mt-2 px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm"
-                                        >
+                                            className="mt-2 px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm"                                        >
                                             Post Comment
                                         </button>
 
                                     </form>
+                                </section>
+
+                                {/* Display comments  */}
+
+                                <section className="mt-10 pt-10 border-t border-slate-200">
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-8 tracking-tight">
+                                        Comments {comments && comments.length > 0 ? <span className="text-slate-500 font-medium text-lg ml-1">({comments.length})</span> : ''}
+                                    </h3>
+
+                                    {!comments || comments.length === 0 ? (
+                                        <div className="p-8 text-center bg-slate-50 border border-slate-100 rounded-2xl">
+                                            <p className="text-slate-500 italic">No comments yet. Be the first to share your thoughts!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-6">
+                                            {comments.map((c, index) => (
+                                                <div key={index} className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200/60 flex gap-4">
+                                                    
+                                                    <div className="w-10 h-10 shrink-0 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-lg">
+                                                        {c.name ? c.name.charAt(0).toUpperCase() : 'U'}
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-col gap-1.5 w-full">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="font-semibold text-slate-900">{c.name || "Anonymous"}</span>
+                                                            <span className="text-xs text-slate-400">{c.date}</span>
+                                                        </div>
+                                                        <p className="text-slate-700 leading-relaxed text-[15px]">
+                                                            {c.comment} 
+                                                        </p>
+                                                    </div>
+                                                    
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </section>
 
                             </article>
