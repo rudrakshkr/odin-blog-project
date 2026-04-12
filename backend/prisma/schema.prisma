@@ -17,8 +17,10 @@ model Users {
   username String @unique @db.VarChar(255)
   email String @db.VarChar(255)
   password String @db.VarChar(255)
-  posts Posts[]
   role     String   @default("USER")
+
+  posts Posts[]
+  comments Comments[]
 }
 
 model Posts {
@@ -35,5 +37,15 @@ model Posts {
   date String
 
   userId Int
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Comments {
+  id Int @id @default(autoincrement())
+  name String
+  comment String
+  date String
+
+  userId Int 
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

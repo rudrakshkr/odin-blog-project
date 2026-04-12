@@ -371,6 +371,53 @@ async function deletePost(req, res, next) {
     }
 }
 
+async function postComment(req, res, next) {
+    try {
+        const {userId} = req.params;
+
+        const {
+            name,
+            comment,
+        } = req.body;
+
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+
+        await prisma.comments.create({
+            data: {
+                name: name,
+                comment: comment,
+                date: `${dd}/${mm}/${yyyy}`,
+                userId: parseInt(userId)
+            }
+        })
+
+        return res.json({message: "Comment added!"});
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+async function getComments(req, res, next) {
+    try {
+        const comments = await prisma.comments.findMany();
+
+        if(!comments) {
+            return res.status(403).send("Failed to fetch comments");
+        }
+
+        return res.json({comments: comments});
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 
 function logout(req, res) {
     return res.sendStatus(200);
@@ -389,5 +436,7 @@ module.exports = {
     getPostBySlug,
     editPostPut,
     deletePost,
+    postComment,
+    getComments,
     logout
 }

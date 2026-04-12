@@ -13,6 +13,8 @@ const {
     getPostBySlug,
     editPostPut,
     deletePost,
+    postComment,
+    getComments,
     logout
 } = require("../controllers/indexController");
 
@@ -41,5 +43,8 @@ indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deleteP
 indexRouter.get('/api/:userId/getUserById', verifyToken, getUserById);
 indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
 indexRouter.get('/api/:postSlug/getPostBySlug', verifyToken, getPostBySlug);
+
+indexRouter.post('/api/:userId/post-comment', verifyToken, postComment);
+indexRouter.get('/api/getComments', getComments);
 
 module.exports = indexRouter;
