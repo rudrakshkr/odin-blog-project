@@ -127,7 +127,6 @@ const Profile = ({user, setUser}) => {
                 }
                 else {
                     // Successfully got the data!
-                    console.log(data.posts)
                     setPosts(data.posts)
                     sessionStorage.setItem("cachedPosts", JSON.stringify(data.posts));
                 }
