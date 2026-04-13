@@ -233,7 +233,7 @@ const ShowPost = ({user, setUser}) => {
                             <Link to="/profile" className="hover:text-slate-900 transition-colors">
                                 Home
                             </Link>
-                            <Link to="/new-post" className="hover:text-slate-900 transition-colors">
+                            <Link to="/about" className="hover:text-slate-900 transition-colors">
                                 About
                             </Link>
                             <a href="https://github.com/newbbiecoder" target="_blank" className="hover:text-slate-900 transition-colors">

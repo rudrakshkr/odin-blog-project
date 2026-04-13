@@ -5,6 +5,7 @@ import LoginPage from './pages/Login';
 import Profile from './pages/Profile';
 import SignupForm from './pages/SignIn';
 import ShowPost from './pages/ShowPost';
+import About from './pages/About';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -36,16 +37,22 @@ function App() {
             element={user.auth ? <Navigate to="/profile" /> : <SignupForm />} 
           />
 
-          {/* Protected Route: Blog posts  */}
+          {/* Public Route: Blog posts  */}
           <Route 
             path="/blogs/:postSlug"
             element= { <ShowPost user={user} setUser={setUser}/> } 
           />
 
-          {/* Protected Route: Profile */}
+          {/* Public Route:s Profile */}
           <Route 
             path="/profile" 
             element={ <Profile user={user} setUser={setUser} />}  
+          />
+
+          {/* Public Route: About */}
+          <Route 
+            path="/about" 
+            element={ <About user={user} setUser={setUser} />}  
           />
 
           {/* Catch-all: Redirects unknown URL's*/} 
