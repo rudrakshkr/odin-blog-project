@@ -38,6 +38,8 @@ model Posts {
 
   userId Int
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  comments Comments[]
 }
 
 model Comments {
@@ -48,4 +50,7 @@ model Comments {
 
   userId Int 
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId Int
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
 }

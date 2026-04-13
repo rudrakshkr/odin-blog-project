@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const {body, validationResult, matchedData} = require("express-validator");
 require("dotenv").config({path: ".env"});
 const prisma = require("../lib/prisma.js");
-const { parse } = require("dotenv");
 
 async function logInPost(req, res) {
     try {
@@ -263,7 +262,7 @@ async function getUserById(req, res, next) {
 
 async function getPosts(req, res, next) {
     try {
-        const tokenUsername = 's';
+        const tokenUsername = 'Rudraksh Kumar';
 
         const getUser = await prisma.users.findUnique({
             where: {
@@ -373,7 +372,7 @@ async function deletePost(req, res, next) {
 
 async function postComment(req, res, next) {
     try {
-        const {userId} = req.params;
+        const {userId, postId} = req.params;
 
         const {
             name,
@@ -390,7 +389,8 @@ async function postComment(req, res, next) {
                 name: name,
                 comment: comment,
                 date: `${dd}/${mm}/${yyyy}`,
-                userId: parseInt(userId)
+                userId: parseInt(userId),
+                postId: parseInt(postId),
             }
         })
 
@@ -404,11 +404,17 @@ async function postComment(req, res, next) {
 
 async function getComments(req, res, next) {
     try {
-        const comments = await prisma.comments.findMany();
+        const {postId} = req.params;
 
-        if(!comments) {
-            return res.status(403).send("Failed to fetch comments");
+        if (isNaN(parseInt(postId))) {
+            return res.status(400).json({ message: "Invalid Post ID" });
         }
+
+        const comments = await prisma.comments.findMany({
+            where: {
+                postId: parseInt(postId),
+            }
+        });
 
         return res.json({comments: comments});
     }

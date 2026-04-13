@@ -34,17 +34,17 @@ indexRouter.get('/api/logout', logout);
 
 // Admin and Token Protected Routes
 indexRouter.post('/api/submit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), submitPost);
-indexRouter.get('/api/get-posts', verifyToken, getPosts);
+indexRouter.get('/api/get-posts', getPosts);
 indexRouter.post('/api/posts/:postId/toggle', verifyToken, verifyAdmin, togglePost);
 indexRouter.put('/api/:postId/edit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), editPostPut);
 indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deletePost);
 
 // Token Protected Routes
-indexRouter.get('/api/:userId/getUserById', verifyToken, getUserById);
-indexRouter.get('/api/:postId/getPostById', verifyToken, getPostById);
-indexRouter.get('/api/:postSlug/getPostBySlug', verifyToken, getPostBySlug);
+indexRouter.get('/api/:userId/getUserById', getUserById);
+indexRouter.get('/api/:postId/getPostById', getPostById);
+indexRouter.get('/api/:postSlug/getPostBySlug', getPostBySlug);
 
-indexRouter.post('/api/:userId/post-comment', verifyToken, postComment);
-indexRouter.get('/api/getComments', getComments);
+indexRouter.post('/api/author/:userId/post/:postId/post-comment', verifyToken, postComment);
+indexRouter.get('/api/post/:postId/getComments', getComments);
 
 module.exports = indexRouter;
