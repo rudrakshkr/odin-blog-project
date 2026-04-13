@@ -424,6 +424,43 @@ async function getComments(req, res, next) {
     }
 }
 
+async function getAllComments(req, res, next) {
+    try {
+        const comments = await prisma.comments.findMany({
+            include: {
+                post: {
+                    select: {title: true, id: true}
+                }
+            },
+            orderBy: {id: 'desc'}
+        });
+
+        return res.json({comments: comments});
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
+async function deleteComment(req, res, next) {
+    try {
+        const {commentId} = req.params;
+
+        await prisma.comments.delete({
+            where: {
+                id: parseInt(commentId)
+            }
+        })
+
+        return res.json({message: "Comment deleted"});
+    }
+    catch(err) {
+        console.error("Prisma error: ", err);
+        return res.status(500).json({message: "Internal Server Error"});
+    }
+}
+
 
 function logout(req, res) {
     return res.sendStatus(200);
@@ -444,5 +481,7 @@ module.exports = {
     deletePost,
     postComment,
     getComments,
+    getAllComments,
+    deleteComment,
     logout
 }

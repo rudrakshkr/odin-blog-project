@@ -15,6 +15,8 @@ const {
     deletePost,
     postComment,
     getComments,
+    getAllComments,
+    deleteComment,
     logout
 } = require("../controllers/indexController");
 
@@ -38,6 +40,8 @@ indexRouter.get('/api/get-posts', getPosts);
 indexRouter.post('/api/posts/:postId/toggle', verifyToken, verifyAdmin, togglePost);
 indexRouter.put('/api/:postId/edit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), editPostPut);
 indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deletePost);
+indexRouter.get('/api/getAllComments', verifyToken, verifyAdmin, getAllComments);
+indexRouter.delete('/api/:commentId/delete-comment', verifyToken, verifyAdmin, deleteComment);
 
 // Frontend Routes
 indexRouter.get('/api/:userId/getUserById', getUserById);
