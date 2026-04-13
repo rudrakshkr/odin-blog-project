@@ -86,24 +86,29 @@ const Profile = ({user, setUser}) => {
                     </div>
 
                     {/* Right Side: User Info & Logout */}
-                    <div className="flex items-center gap-5">         
-                        {user.name && (
-                            <div className="hidden sm:flex items-center gap-1.5 font-geist">
-                                <span className="text-sm text-slate-500">Welcome,</span>
-                                <span className="text-sm font-semibold text-slate-900">{user.name}</span>
-                            </div>
-                        )}
-
-                        <div className="hidden sm:block h-5 w-px bg-slate-200"></div>
-                        
-                        {/* Logout Button */}
-                        <button 
-                            onClick={handleLogout}
-                            className="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-200"
-                        >
-                            Logout
-                        </button>
-                    </div>
+                    {user.auth ? (
+                        <div className="flex items-center gap-6">
+                            <p className="text-md text-slate-700">
+                                Welcome <strong>{user.name}</strong>
+                            </p>
+                            
+                            <button 
+                                onClick={handleLogout}
+                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ): (
+                        <div className="flex items-center gap-6">
+                            <Link 
+                                to={"/login"}
+                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            >
+                                Log In
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </nav>
 
@@ -132,6 +137,7 @@ const Profile = ({user, setUser}) => {
                                 className="bg-white rounded-2xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1.5 group" 
                                 key={post.id}
                                 to={`/blogs/${post.urlSlug}`}
+                                state={{initialPostData: post}}
                                 // onClick={() => handlePostClick(post.id)}
                             >
                                 <div className="w-full aspect-[16/9] bg-slate-100 overflow-hidden shrink-0">

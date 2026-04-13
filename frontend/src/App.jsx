@@ -27,39 +27,31 @@ function App() {
           {/* Public Route: Login */}
           <Route 
             path="/login" 
-            element={
-              user.auth ? <Navigate to="/profile" /> : <LoginPage setUser={setUser} />
-            } 
+            element={user.auth ? <Navigate to="/profile" /> : <LoginPage setUser={setUser} />} 
           />
           
           {/* Public Route: Sign Up */}
           <Route 
             path="/sign-up" 
-            element={
-              user.auth ? <Navigate to="/profile" /> : <SignupForm />
-            } 
+            element={user.auth ? <Navigate to="/profile" /> : <SignupForm />} 
           />
 
           {/* Protected Route: Blog posts  */}
           <Route 
             path="/blogs/:postSlug"
-            element= {
-              user.auth ? <ShowPost user={user} setUser={setUser}/> : <Navigate to="/login" />
-            }
+            element= { <ShowPost user={user} setUser={setUser}/> } 
           />
 
           {/* Protected Route: Profile */}
           <Route 
             path="/profile" 
-            element={
-              user.auth ? <Profile user={user} setUser={setUser} /> : <Navigate to="/login" />
-            } 
+            element={ <Profile user={user} setUser={setUser} />}  
           />
 
           {/* Catch-all: Redirects unknown URL's*/} 
           <Route 
             path="*" 
-            element={<Navigate to={user.auth ? "/profile" : "/login"} />} 
+            element={ <Navigate to={"/profile"} /> } 
           />
 
         </Routes>

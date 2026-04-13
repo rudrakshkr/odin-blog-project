@@ -9,12 +9,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Link } from "react-router"
-import { useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 
 export function LoginForm({ className, setUser, ...props }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,11 +37,13 @@ export function LoginForm({ className, setUser, ...props }) {
       if (!res.ok) {
         if (res.status === 401) setErrors('Invalid credentials');
         else setErrors(data.message || 'Please try again.');
-      } else {
+      } 
+      else {
         localStorage.setItem('jwtToken', data.token);
         if (setUser) {
           setUser({ auth: true, name: data.username });
         }
+        navigate('/profile');
       }
     } catch (err) {
       setErrors('Network error. Is the backend running?');

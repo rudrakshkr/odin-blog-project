@@ -1,163 +1,157 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
-import { ThreeDots } from "react-loader-spinner";
+import { Link, useParams, useLocation } from "react-router";
+import { ThreeDots, TailSpin } from "react-loader-spinner";
 import DOMPurify from 'dompurify';
 
 const ShowPost = ({user, setUser}) => {
     const token = localStorage.getItem("jwtToken");
     const {postSlug} = useParams();
 
+    const location = useLocation();
+    const preLoadedPost = location.state?.initialPostData;
+
     // States
-    const [formData, setFormData] = useState({
-        postTitle: '', 
-        postDescription: '',
-        postStatus: 'draft',
-        postCategory: '',
-        postReadMin: 0,
-        postTags: '',
-        postUrl: '',
-        postSummary: '',
-        postAuthor: '',
-        postDate: '',
-        userId: null,
+    const [formData, setFormData] = useState(() => {
+        const savedDraft = localStorage.getItem("postDraft");
+
+        if(savedDraft) {
+            return JSON.parse(savedDraft);
+        }
+
+        return {
+            postTitle: preLoadedPost?.title ||  '', 
+            postDescription: preLoadedPost?.description ||  '',
+            postStatus: preLoadedPost?.status ||  '',
+            postCategory: preLoadedPost?.category ||  '',
+            postReadMin: preLoadedPost?.readMin ||  '',
+            postTags: preLoadedPost?.tags ||  '',
+            postUrl: preLoadedPost?.urlSlug ||  '',
+            postSummary: preLoadedPost?.summary ||  '',
+            postAuthor: '',
+            postDate: preLoadedPost?.date ||  '',
+            userId: null,
+            postId: null,
+        }
     })
-    const [newComment, setNewComment] = useState({name: '', comment: '', date: ''});
-    const [comments, setComments] = useState({name: '', comment: '', date: ''});
+    const [newComment, setNewComment] = useState(() => {
+        const savedComment = localStorage.getItem(`commentDraft_${postSlug}`);
+        
+        if (savedComment) {
+            return JSON.parse(savedComment);
+        }
+        
+        return { name: '', comment: '' };
+    });
+    const [comments, setComments] = useState([]);
     const [successMessage, setSuccessMessage] = useState("");
+
     const [errors, setErrors] = useState('');
+    const [commentError, setCommentError] = useState('');
+
     const [isLoading, setIsLoading] = useState(true);
 
+    const [isCommenting, setIsCommenting] = useState(false);
+
     useEffect(() => {
-        const getPost = async () => {
+        localStorage.setItem(`commentDraft_${postSlug}`, JSON.stringify(newComment));
+    }, [newComment, postSlug]);
+
+    // Fetch comments and author
+    useEffect(() => {
+        const fetchEverything = async () => {
             try {
-                const res = await fetch(`/api/${postSlug}/getPostBySlug`, {
+                const postRes = await fetch(`/api/${postSlug}/getPostBySlug`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`
                     }
-                })
-
-                const data = await res.json();
-
-                const rawDate = data.post.date;
-
-                const [day, month, year] = rawDate.split('/');
-
-                const dateObj = new Date(year, month - 1, day);
-
-                const formattedDate = dateObj.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
                 });
 
-                if(!res.ok) {
-                    setErrors("Failed to get posts. ");
-                }
+                if(!postRes.ok) throw new Error("Failed to get post.");
+                const postData = await postRes.json();
                 
+                // Format Post Date
+                let formattedPostDate = postData.post.date; 
+                
+                if (typeof postData.post.date === 'string' && postData.post.date.includes('/')) {
+                    const [day, month, year] = postData.post.date.split('/');
+                    formattedPostDate = new Date(year, month - 1, day).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric'
+                    });
+                }
+
                 setFormData({
-                    postTitle: data.post.title || '',
-                    postDescription: data.post.description || '',
-                    postStatus: data.post.status || 'draft',
-                    postCategory: data.post.category || '',
-                    postReadMin: data.post.readMin || 0,
-                    postTags: data.post.tags || '',
-                    postUrl: data.post.urlSlug || '',
-                    postSummary: data.post.summary || '',
-                    postDate: formattedDate || '',
-                    userId: data.post.userId || null
+                    postTitle: postData.post.title || '',
+                    postDescription: postData.post.description || '',
+                    postStatus: postData.post.status || 'draft',
+                    postCategory: postData.post.category || '',
+                    postReadMin: postData.post.readMin || 0,
+                    postTags: postData.post.tags || '',
+                    postUrl: postData.post.urlSlug || '',
+                    postSummary: postData.post.summary || '',
+                    postDate: formattedPostDate,
+                    userId: postData.post.userId || null,
+                    postId: postData.post.id || null,
+                    postAuthor: ''
                 });
-                
-                
-                if(data.post.userId) {
-                    const getUser = await fetch(`/api/${data.post.userId}/getUserById`, {
-                        method: 'GET',
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`
-                        }
-                    })
 
-                    const getUserData = await getUser.json();
+                const postId = postData.post.id;
+                const userId = postData.post.userId;
 
-                    if(!data) {
-                        setErrors("Failed to get user");
-                    }
+                const [userRes, commentsRes] = await Promise.all([
+                    userId ? fetch(`/api/${userId}/getUserById`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    }) : Promise.resolve(null),
+                    fetch(`/api/post/${postId}/getComments`)
+                ]);
 
-                    setFormData(prevData => ({
-                        ...prevData,
-                        ["postAuthor"]: getUserData.user.username
-                    }))
+                // Get Author
+                if (userRes && userRes.ok) {
+                    const userData = await userRes.json();
+                    setFormData(prev => ({ ...prev, postAuthor: userData.user.username }));
                 }
-                
-            }
-            catch(err) {
-                console.error("Failed to fetch post", err);
-            }
-            finally {
+
+                // Get Comments
+                if (commentsRes.ok) {
+                    const commentsData = await commentsRes.json();
+                    const formattedComments = commentsData.comments.map(comment => {
+                        if (!comment.date) return comment;
+                        const [d, m, y] = comment.date.split('/');
+                        return {
+                            ...comment,
+                            date: new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        };
+                    });
+                    setComments(formattedComments);
+                }
+
+            } catch(err) {
+                console.error("Fetch error: ", err);
+                setErrors("Failed to load page data.");
+            } finally {
                 setIsLoading(false);
             }
-        }
+        };
 
-        getPost();
-    }, [token])
-
-    useEffect(() => {
-        async function getComments() {
-            try {
-                const res = await fetch(`/api/getComments`, {
-                    method: 'GET',
-                    headers: {
-                        "Content-Type": "application/json",
-                    }
-                })
-
-                if(!res.ok) {
-                    setErrors("Failed to fetch comments.");
-                    return;
-                }
-
-                const data = await res.json();
-
-                const formattedComments = data.comments.map(comment => {
-                    if (!comment.date) return comment; 
-
-                    const rawDate = comment.date;
-                    const [day, month, year] = rawDate.split('/');
-                    const dateObj = new Date(year, month - 1, day);
-                    
-                    const formattedDate = dateObj.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
-
-                    return {
-                        ...comment,
-                        date: formattedDate
-                    };
-                });
-
-
-                setComments(formattedComments);
-            }
-            catch(err) {
-                console.error("Failed to post comment: ", err);
-                setErrors("Internal server error. Please refresh")
-            }
-        }
-
-        getComments();
-    }, [postSlug])
+        fetchEverything();
+    }, [postSlug, token]);
 
     async function handleCommentSubmit(e) {
         e.preventDefault();
 
         const postAuthorId = formData.userId;
+        const postId = formData.postId;
 
         try {
-            const res = await fetch(`/api/${postAuthorId}/post-comment`, {
+            setIsCommenting(true);
+
+            if (newComment.name.trim().length < 5) {
+                setCommentError("Name must contain at least 5 real characters.");
+                return;
+            }
+
+            const res = await fetch(`/api/author/${postAuthorId}/post/${postId}/post-comment`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -172,16 +166,29 @@ const ShowPost = ({user, setUser}) => {
             }
 
             setSuccessMessage("Success: Comment is now published!");
+            setCommentError('');
 
             setTimeout(() => {
                 setSuccessMessage("");
             }, 3000);
+
+            setComments(prevComments => [
+                ...prevComments, 
+                { 
+                    name: newComment.name, 
+                    comment: newComment.comment, 
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+                }
+            ]);
 
             setNewComment({name: '', comment: ''});
         }
         catch(err) {
             console.error("Failed to post comment: ", err);
             setErrors("Internal server error. Please refresh")
+        }
+        finally {
+            setIsCommenting(false);
         }
     }
 
@@ -236,24 +243,29 @@ const ShowPost = ({user, setUser}) => {
                     </div>
 
                     {/* Right Side: User Info & Logout */}
-                    <div className="flex items-center gap-5">         
-                        {user.name && (
-                            <div className="hidden sm:flex items-center gap-1.5 font-geist">
-                                <span className="text-sm text-slate-500">Welcome,</span>
-                                <span className="text-sm font-semibold text-slate-900">{user.name}</span>
-                            </div>
-                        )}
-
-                        <div className="hidden sm:block h-5 w-px bg-slate-200"></div>
-                        
-                        {/* Logout Button */}
-                        <button 
-                            onClick={handleLogout}
-                            className="px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-200"
-                        >
-                            Logout
-                        </button>
-                    </div>
+                    {user.auth ? (
+                        <div className="flex items-center gap-6">
+                            <p className="text-md text-slate-700">
+                                Welcome <strong>{user.name}</strong>
+                            </p>
+                            
+                            <button 
+                                onClick={handleLogout}
+                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ): (
+                        <div className="flex items-center gap-6">
+                            <Link 
+                                to={"/login"}
+                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            >
+                                Log In
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </nav>
 
@@ -288,7 +300,7 @@ const ShowPost = ({user, setUser}) => {
                                         {formData.postTitle || "Post Title"}
                                     </h1>
                                     <div className="flex flex-col text-[15px] font-medium text-slate-600 gap-0.5">
-                                        <span className="text-slate-900 font-semibold">{formData.postAuthor || "Alex Developer"}</span>
+                                        <span className="text-slate-900 font-semibold">{formData.postAuthor}</span>
                                         <span className="text-slate-500">{formData.postDate || "March 15, 2024"}</span>
                                     </div>
                                 </header>
@@ -317,47 +329,97 @@ const ShowPost = ({user, setUser}) => {
                                 )}
 
                                 {/* Comment Section */}
-                                <section className="pb-10">
-                                    <h2 className="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Leave a Comment</h2>
-                                    
-                                    <form className="flex flex-col gap-5 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/60" onSubmit={handleCommentSubmit}>
+                                {user.auth ? (
+                                    <section className="pb-10">
+                                        <h2 className="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Leave a Comment</h2>
                                         
-                                        <div className="flex flex-col gap-1.5">
-                                            <label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">Name</label>
-                                            <input 
-                                                type="text" 
-                                                id="name" 
-                                                name="name"
-                                                value={newComment.name}
-                                                onChange={handleChange}
-                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all text-slate-900"
-                                                placeholder="Your Name"
-                                                required
-                                            />
-                                        </div>
-                                        
-                                        <div className="flex flex-col gap-1.5">
-                                            <label htmlFor="comment" className="text-sm font-semibold text-slate-700 ml-1">Comment</label>
-                                            <textarea 
-                                                id="comment" 
-                                                name="comment"
-                                                value={newComment.comment}
-                                                onChange={handleChange}
-                                                rows="5" 
-                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all resize-y text-slate-900"
-                                                placeholder="What are your thoughts?"
-                                                required
-                                            ></textarea>
+                                        <form className="flex flex-col gap-5 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/60" onSubmit={handleCommentSubmit}>
+                                            {commentError && (
+                                                <div className="p-4 m-4 max-w-3xl mx-auto w-full bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm text-center font-medium">
+                                                    {commentError}
+                                                </div>
+                                            )}
+
+                                            <div className="flex flex-col gap-1.5">
+                                                <label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    id="name" 
+                                                    name="name"
+                                                    value={newComment.name}
+                                                    onChange={handleChange}
+                                                    minLength={5}
+                                                    maxLength={30}
+                                                    title="Name must be atleast 5-30 characters long."
+                                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all text-slate-900"
+                                                    placeholder="Your Name"
+                                                    required
+                                                />
+                                            </div>
+                                            
+                                            <div className="flex flex-col gap-1.5">
+                                                <label htmlFor="comment" className="text-sm font-semibold text-slate-700 ml-1">Comment</label>
+                                                <textarea 
+                                                    id="comment" 
+                                                    name="comment"
+                                                    value={newComment.comment}
+                                                    onChange={handleChange}
+                                                    rows="5" 
+                                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all resize-y text-slate-900"
+                                                    placeholder="What are your thoughts?"
+                                                    required
+                                                ></textarea>
+                                            </div>
+
+                                            
+
+                                            <button 
+                                                type="submit" 
+                                                className="flex gap-4 mt-2 px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm"                                        >
+                                                {isCommenting && (
+                                                    <TailSpin
+                                                            visible={true}
+                                                            height="20"
+                                                            width="20"
+                                                            color="#ffffff"
+                                                            ariaLabel="tail-spin-loading"
+                                                            radius="1"
+                                                        />
+                                                    )}
+                                                    <p>{isCommenting ? "Posting..." : "Post Comment"}</p>
+                                            </button>
+                                        </form>
+                                    </section>
+                                ): (
+                                    <section className="flex flex-col items-center justify-center gap-3 bg-slate-50 p-8 md:p-12 rounded-2xl border border-slate-200/60 shadow-sm text-center">
+            
+                                        {/* Lock Icon */}
+                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 text-slate-400 mb-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                         </div>
 
-                                        <button 
-                                            type="submit" 
-                                            className="mt-2 px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm"                                        >
-                                            Post Comment
-                                        </button>
+                                        <h3 className="text-xl font-bold text-slate-900">Join the Conversation</h3>
+                                        <p className="text-slate-600 max-w-md mb-3 leading-relaxed">
+                                            You must be logged in to share your thoughts. Log in to your account or sign up to leave a comment!
+                                        </p>
 
-                                    </form>
-                                </section>
+                                        <div className="flex items-center gap-4 mt-2">
+                                            <Link 
+                                                to="/login" 
+                                                className="px-8 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-sm"
+                                            >
+                                                Log In
+                                            </Link>
+                                            <Link 
+                                                to="/sign-up" 
+                                                className="px-8 py-2.5 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 hover:-translate-y-0.5 transition-all shadow-sm"
+                                            >
+                                                Sign Up
+                                            </Link>
+                                        </div>
+                                        
+                                    </section>
+                                )}
 
                                 {/* Display comments  */}
 
