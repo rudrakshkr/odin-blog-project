@@ -39,12 +39,13 @@ indexRouter.post('/api/posts/:postId/toggle', verifyToken, verifyAdmin, togglePo
 indexRouter.put('/api/:postId/edit-post', verifyToken, verifyAdmin, upload.single('postCoverImage'), editPostPut);
 indexRouter.delete('/api/:postId/delete-post', verifyToken, verifyAdmin, deletePost);
 
-// Token Protected Routes
+// Frontend Routes
 indexRouter.get('/api/:userId/getUserById', getUserById);
 indexRouter.get('/api/:postId/getPostById', getPostById);
 indexRouter.get('/api/:postSlug/getPostBySlug', getPostBySlug);
-
-indexRouter.post('/api/author/:userId/post/:postId/post-comment', verifyToken, postComment);
 indexRouter.get('/api/post/:postId/getComments', getComments);
+
+// Token Protected Routes
+indexRouter.post('/api/author/:userId/post/:postId/post-comment', verifyToken, postComment);
 
 module.exports = indexRouter;
