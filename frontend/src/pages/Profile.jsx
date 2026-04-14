@@ -33,9 +33,9 @@ const Profile = ({user, setUser}) => {
                 }
                 else {
                     // Successfully got the data!
-                    console.log(data.posts)
-                    setPosts(data.posts)
-                    sessionStorage.setItem("cachedPosts", JSON.stringify(data.posts));
+                    const publishedPosts = data.posts.filter(post => post.status === "published");
+                    setPosts(publishedPosts)
+                    sessionStorage.setItem("cachedPosts", JSON.stringify(publishedPosts));
                 }
             } 
             finally {

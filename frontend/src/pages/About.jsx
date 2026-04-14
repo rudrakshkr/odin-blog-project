@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import myPhoto from "../assets/images/my-photo.jpeg";
 
 const About = ({user, setUser}) => {
 
@@ -79,9 +80,11 @@ const About = ({user, setUser}) => {
 
                     <div className="relative group cursor-default mt-4">
                         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-500 group-hover:duration-200"></div>
-                        <div className="relative w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl text-indigo-600 flex items-center justify-center font-bold text-4xl transform group-hover:scale-105 transition-all duration-300">
-                            RK
-                        </div>
+                        <img 
+                            className="relative w-40 h-40 rounded-full bg-white border-4 border-white shadow-xl text-indigo-600 flex items-center justify-center font-bold text-4xl transform group-hover:scale-105 transition-all duration-300"
+                            src={myPhoto} 
+                            alt="My profile photo" 
+                        />
                     </div>
 
                     <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">

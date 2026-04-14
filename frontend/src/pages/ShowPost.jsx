@@ -302,6 +302,7 @@ const ShowPost = ({user, setUser}) => {
                                     <div className="flex flex-col text-[15px] font-medium text-slate-600 gap-0.5">
                                         <span className="text-slate-900 font-semibold">{formData.postAuthor}</span>
                                         <span className="text-slate-500">{formData.postDate || "March 15, 2024"}</span>
+                                        <span className="text-slate-500">Read Time: {`${formData.postReadMin} Min` || "0 Min"}</span>
                                     </div>
                                 </header>
 
