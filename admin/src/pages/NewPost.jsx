@@ -194,12 +194,12 @@ const NewPost = ({user, setUser}) => {
                                 id="postTitle" 
                                 value={formData.postTitle}
                                 onChange={handleChange}
-                                maxLength={50}
+                                maxLength={60}
                                 placeholder="Post Title"
                                 className="w-full px-0 py-3 text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
                                 required
                             />
-                            <p className="text-sm text-slate-500">Max 50 characters</p>
+                            <p className="text-sm text-slate-500">Max 60 characters</p>
                         </div>
                         
                         {/* Cover Image */}
@@ -365,7 +365,7 @@ const NewPost = ({user, setUser}) => {
                                 <p className="font-bold text-[17px]">SEO</p>
 
                                 <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500">(Max 15 characters)</span></label>
+                                    <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
                                     <input 
                                         type="text" 
                                         name="postUrl" 
@@ -374,7 +374,7 @@ const NewPost = ({user, setUser}) => {
                                         onChange={handleChange}
                                         pattern="^[a-zA-Z0-9\-]+$"
                                         title="URL slug can only contain letters, numbers, and hyphens (no spaces or special characters)."
-                                        maxLength={15}
+                                        maxLength={30}
                                         placeholder="place-url-slug"
                                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
                                         required
@@ -382,7 +382,7 @@ const NewPost = ({user, setUser}) => {
                                 </div>
 
                                 <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500">(Max 100 characters)</span></label>
+                                    <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500">(Max 175 characters)</span></label>
                                     <textarea 
                                         type="text" 
                                         name="postSummary" 
@@ -390,8 +390,8 @@ const NewPost = ({user, setUser}) => {
                                         value={formData.postSummary}
                                         onChange={handleChange}
                                         placeholder="Brief summary for previews..."
-                                        maxLength={100}
-                                        rows={4}
+                                        maxLength={175}
+                                        rows={5}
                                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none" 
                                         required
                                     ></textarea>
