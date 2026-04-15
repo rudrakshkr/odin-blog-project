@@ -165,32 +165,32 @@ const EditPost = ({ user, setUser }) => {
     return (
         <div className="w-full min-h-screen flex flex-col">
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 z-10 relative">
-                <div className="flex justify-between items-center w-full max-w-6xl mx-auto px-4 pt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-6xl mx-auto px-4 pt-4 gap-y-3">
                     
                     {/* Left Side: Navigation Links */}
-                    <div className="flex gap-8 font-geist text-[#6f7279] font-semibold">
-                        <Link to="/profile" className="pb-4 hover:text-slate-900 transition-colors">
+                    <div className="flex gap-5 sm:gap-8 font-geist text-sm sm:text-base text-[#6f7279] font-semibold w-full sm:w-auto justify-between sm:justify-start overflow-x-auto no-scrollbar">
+                        <Link to="/profile" className="pb-3 sm:pb-4 hover:text-slate-900 transition-colors whitespace-nowrap">
                             Posts
                         </Link>
                         
-                        <Link to="/new-post" className="pb-4 hover:text-slate-900 transition-colors">
+                        <Link to="/new-post" className="pb-3 sm:pb-4 hover:text-slate-900 transition-colors whitespace-nowrap">
                             New Post
                         </Link>
                         
-                        <Link to="/comments" className="pb-4 hover:text-slate-900 transition-colors">
+                        <Link to="/comments" className="pb-3 sm:pb-4 hover:text-slate-900 transition-colors whitespace-nowrap">
                             Comments
                         </Link>
                     </div>
 
                     {/* Right Side: User Info & Logout Button */}
-                    <div className="flex items-center gap-6 pb-4">
-                        <p className="text-md text-slate-700">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pb-4 w-full sm:w-auto border-t sm:border-none border-slate-100 pt-3 sm:pt-0">
+                        <p className="text-sm sm:text-md text-slate-700">
                             Welcome <strong>{user.name}</strong>
                         </p>
                         
                         <button 
                             onClick={handleLogout}
-                            className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0"
                         >
                             Logout
                         </button>
@@ -310,7 +310,7 @@ const EditPost = ({ user, setUser }) => {
                             <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4">
                                 <div className="flex flex-col gap-5">
                                     {/* Post status && Publish */}
-                                    <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                                    <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white order-first sm:order-last">
                                         <p className="font-bold text-[17px]">Publishing</p>
                                         <div className="flex flex-col gap-1">
                                             <label htmlFor="postStatus" className="text-[14px] text-gray-700 pt-4 pb-2">Status</label>
