@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 const Comments = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const token = localStorage.getItem("jwtToken");
 
     // States
@@ -21,7 +23,7 @@ const Comments = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 
@@ -41,7 +43,7 @@ const Comments = ({user, setUser}) => {
         try {
             setDeletingId(commentId);
 
-            const res = await fetch(`/api/${commentId}/delete-comment`, {
+            const res = await fetch(`${API_URL}/api/${commentId}/delete-comment`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "application/json",
@@ -76,7 +78,7 @@ const Comments = ({user, setUser}) => {
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const res = await fetch('/api/getAllComments', {
+                const res = await fetch(`${API_URL}/api/getAllComments`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",

@@ -4,6 +4,8 @@ import { Editor } from "@tinymce/tinymce-react";
 import { TailSpin } from "react-loader-spinner";
 
 const NewPost = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const token = localStorage.getItem("jwtToken");
     const navigate = useNavigate();
 
@@ -24,7 +26,7 @@ const NewPost = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 
@@ -103,7 +105,7 @@ const NewPost = ({user, setUser}) => {
 
         try {
             setIsSubmitting(true);
-            const res = await fetch('/api/submit-post', {
+            const res = await fetch(`${API_URL}/api/submit-post`, {
                 method: 'POST',
                 headers: {
                     "Authorization": `Bearer ${token}`

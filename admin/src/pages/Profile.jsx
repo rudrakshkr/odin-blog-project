@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const Profile = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const navigate = useNavigate();
     const token = localStorage.getItem("jwtToken");
     const location = useLocation();
@@ -41,7 +43,7 @@ const Profile = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 
@@ -58,7 +60,7 @@ const Profile = ({user, setUser}) => {
         const newStatus = currentStatus === "published" ? "draft" : "published";
 
         try {
-            const res = await fetch(`/api/posts/${postId}/toggle`, {
+            const res = await fetch(`${API_URL}/api/posts/${postId}/toggle`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -97,7 +99,7 @@ const Profile = ({user, setUser}) => {
         try {
             setDeletingId(postId);
 
-            const res = await fetch(`/api/${postId}/delete-post`, {
+            const res = await fetch(`${API_URL}/api/${postId}/delete-post`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "application/json",
@@ -131,7 +133,7 @@ const Profile = ({user, setUser}) => {
     useEffect(() => {
         const getPosts = async () => {
             try {
-                const res = await fetch('/api/get-posts', {
+                const res = await fetch(`${API_URL}/api/get-posts`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",

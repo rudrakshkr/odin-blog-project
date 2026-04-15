@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { TailSpin } from 'react-loader-spinner';
 
 const SignupForm = () => {
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -29,7 +31,7 @@ const SignupForm = () => {
     
     try { 
         setIsSubmitting(true);
-        const res = await fetch('/api/sign-up', {
+        const res = await fetch(`${API_URL}/api/sign-up`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",

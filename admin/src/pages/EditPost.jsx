@@ -5,6 +5,8 @@ import {ThreeDots} from "react-loader-spinner"
 import { TailSpin } from "react-loader-spinner";
 
 const EditPost = ({ user, setUser }) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const token = localStorage.getItem("jwtToken");
     const navigate = useNavigate();
     const {postId} = useParams();
@@ -28,7 +30,7 @@ const EditPost = ({ user, setUser }) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 
@@ -44,7 +46,7 @@ const EditPost = ({ user, setUser }) => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const resPost = await fetch(`/api/${postId}/getPostById`, {
+                const resPost = await fetch(`${API_URL}/api/${postId}/getPostById`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
@@ -137,7 +139,7 @@ const EditPost = ({ user, setUser }) => {
 
         try {
             setIsSubmitting(true);
-            const res = await fetch(`/api/${postId}/edit-post`, {
+            const res = await fetch(`${API_URL}/api/${postId}/edit-post`, {
                 method: 'PUT',
                 headers: {
                     "Authorization": `Bearer ${token}`
