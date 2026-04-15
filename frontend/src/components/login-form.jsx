@@ -13,6 +13,9 @@ import { TailSpin } from "react-loader-spinner"
 import { useLocation, useNavigate } from "react-router"
 
 export function LoginForm({ className, setUser, ...props }) {
+  const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
+  // States
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +29,7 @@ export function LoginForm({ className, setUser, ...props }) {
     
     try {
       setIsSubmitting(true);
-      const res = await fetch('/api/login', {
+      const res = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",

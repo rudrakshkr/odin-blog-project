@@ -5,6 +5,8 @@ import DOMPurify from 'dompurify';
 import { cn } from "@/lib/utils";
 
 const ShowPost = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const token = localStorage.getItem("jwtToken");
     const {postSlug} = useParams();
 
@@ -69,7 +71,7 @@ const ShowPost = ({user, setUser}) => {
     useEffect(() => {
         const fetchEverything = async () => {
             try {
-                const postRes = await fetch(`/api/${postSlug}/getPostBySlug`, {
+                const postRes = await fetch(`${API_URL}/api/${postSlug}/getPostBySlug`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
@@ -110,10 +112,10 @@ const ShowPost = ({user, setUser}) => {
                 const userId = postData.post.userId;
 
                 const [userRes, commentsRes] = await Promise.all([
-                    userId ? fetch(`/api/${userId}/getUserById`, {
+                    userId ? fetch(`${API_URL}/api/${userId}/getUserById`, {
                         headers: { "Authorization": `Bearer ${token}` }
                     }) : Promise.resolve(null),
-                    fetch(`/api/post/${postId}/getComments`)
+                    fetch(`${API_URL}/api/post/${postId}/getComments`)
                 ]);
 
                 // Get Author
@@ -161,7 +163,7 @@ const ShowPost = ({user, setUser}) => {
                 return;
             }
 
-            const res = await fetch(`/api/author/${postAuthorId}/post/${postId}/post-comment`, {
+            const res = await fetch(`${API_URL}/api/author/${postAuthorId}/post/${postId}/post-comment`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -205,7 +207,7 @@ const ShowPost = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 

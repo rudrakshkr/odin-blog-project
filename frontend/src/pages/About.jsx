@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
 const About = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     // States
     const [toastMessage, setToastMessage] = useState("");
 
@@ -19,7 +21,7 @@ const About = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault();
-        const res = await fetch('/api/logout', { method: 'GET' });
+        const res = await fetch(`${API_URL}/api/logout`, { method: 'GET' });
 
         if (!res.ok) {
             throw new Error("Can't logout, please try again!");

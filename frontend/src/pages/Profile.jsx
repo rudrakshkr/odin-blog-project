@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router"
 import { cn } from "@/lib/utils";
 
 const Profile = ({user, setUser}) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
     const token = localStorage.getItem("jwtToken");
     const location = useLocation();
     const navigate = useNavigate();
@@ -40,7 +42,7 @@ const Profile = ({user, setUser}) => {
     useEffect(() => {
         const getPosts = async () => {
             try {
-                const res = await fetch('/api/get-posts', {
+                const res = await fetch(`${API_URL}/api/get-posts`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
@@ -68,7 +70,7 @@ const Profile = ({user, setUser}) => {
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
-        const res = await fetch('/api/logout', {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: 'GET'
         })
 
