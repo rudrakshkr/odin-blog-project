@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router"
 import { useLocation } from "react-router"
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 const Profile = ({user, setUser}) => {
     const navigate = useNavigate();
@@ -19,6 +20,24 @@ const Profile = ({user, setUser}) => {
         return sessionStorage.getItem("cachedPosts") ? false : true;
     });
     const [deletingId, setDeletingId] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+
+    // Set the toast message and disappear after 3 seconds
+    useEffect(() => {
+        if(location.state?.successMessage) {
+            setToastMessage(location.state.successMessage);
+            navigate(location.pathname, {replace: true, state: {}});
+        }
+    }, [location.state, navigate, location.pathname]);
+
+    useEffect(() => {
+        if(toastMessage) {
+            const timer = setTimeout(() => {
+                setToastMessage("");
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toastMessage]);
 
     const handleLogout = async (e) => {
         e.preventDefault(e)
@@ -191,6 +210,31 @@ const Profile = ({user, setUser}) => {
                             {successMessage}
                         </div>
                     )}
+
+                    {/* Toast Notification (Adjusted max-width for tiny phones) */}
+                    <div
+                        className={cn(
+                            "fixed top-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out w-[90%] max-w-[350px] sm:w-auto",
+                            toastMessage 
+                                ? "opacity-100 translate-y-0" 
+                                : "opacity-0 -translate-y-8 pointer-events-none"
+                        )}
+                    >
+                        <div className="flex items-center gap-3 bg-white border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 sm:px-5 py-3 rounded-xl w-full">
+                            <div className="flex items-center justify-center size-8 bg-emerald-50 rounded-lg shrink-0">
+                                <svg className="size-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            
+                            <div className="flex flex-col gap-0.5 overflow-hidden">
+                                <p className="text-[14px] font-bold text-slate-900 leading-none">Success</p>
+                                <p className="text-[13px] font-medium text-slate-500 truncate">
+                                    {toastMessage}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Display posts  */}
                     {isLoading ? (

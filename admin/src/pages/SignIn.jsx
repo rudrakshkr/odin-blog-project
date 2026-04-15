@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { TailSpin } from 'react-loader-spinner';
 
 const SignupForm = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const SignupForm = () => {
   });
 
   const [errors, setErrors] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,7 +27,8 @@ const SignupForm = () => {
     console.log('Form submitted:', formData);
     setErrors([]);
     
-    try {
+    try { 
+        setIsSubmitting(true);
         const res = await fetch('/api/sign-up', {
             method: 'POST',
             headers: {
@@ -59,6 +62,9 @@ const SignupForm = () => {
     } catch(err) {
         console.error("Fetch error: ", err);
         setErrors(["Failed to connect to the server."])
+    }
+    finally {
+      setIsSubmitting(false);
     }
 
   };
@@ -123,10 +129,21 @@ const SignupForm = () => {
           </div>
           
           <button 
-            type="submit" 
-            className="w-full py-3 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 py-3.5 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
           >
-            Sign Up
+              {isSubmitting && (
+                  <TailSpin
+                      visible={true}
+                      height="20"
+                      width="20"
+                      color="#ffffff"
+                      ariaLabel="tail-spin-loading"
+                      radius="1"
+                  />
+              )}
+              <span>{isSubmitting ? "Signing up..." : "Sign up"}</span>
           </button>
         </form>
         

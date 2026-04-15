@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
-const Comments = ({user}) => {
+const Comments = ({user, setUser}) => {
     const token = localStorage.getItem("jwtToken");
 
     // States

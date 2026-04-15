@@ -65,7 +65,7 @@ function App() {
           <Route 
             path='/:postId/edit-post'
             element={
-              user.auth ? <EditPost user={user} /> : <Navigate to="/login" />
+              user.auth ? <EditPost user={user} setUser={setUser} /> : <Navigate to="/login" />
             }
           />
           
@@ -73,7 +73,7 @@ function App() {
           <Route 
             path='/comments'
             element={
-              user.auth ? <Comments user={user} /> : <Navigate to="/login" />
+              user.auth ? <Comments user={user} setUser={setUser} /> : <Navigate to="/login" />
             }
           />
 
