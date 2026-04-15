@@ -310,7 +310,7 @@ const EditPost = ({ user, setUser }) => {
                             <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4">
                                 <div className="flex flex-col gap-5">
                                     {/* Post status && Publish */}
-                                    <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white order-first sm:order-last">
+                                    <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white order-last lg:order-first">
                                         <p className="font-bold text-[17px]">Publishing</p>
                                         <div className="flex flex-col gap-1">
                                             <label htmlFor="postStatus" className="text-[14px] text-gray-700 pt-4 pb-2">Status</label>
