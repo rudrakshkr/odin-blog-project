@@ -143,32 +143,32 @@ const NewPost = ({user, setUser}) => {
     return (
         <div className="w-full min-h-screen flex flex-col">
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 z-10 relative">
-                <div className="flex justify-between items-center w-full max-w-6xl mx-auto px-4 pt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-6xl mx-auto px-4 pt-4 gap-y-3">
                     
                     {/* Left Side: Navigation Links */}
-                    <div className="flex gap-8 font-geist text-[#6f7279] font-semibold">
-                        <Link to="/profile" className="pb-4 hover:text-slate-900 transition-colors">
+                    <div className="flex gap-5 sm:gap-8 font-geist text-sm sm:text-base text-[#6f7279] font-semibold w-full sm:w-auto justify-between sm:justify-start overflow-x-auto no-scrollbar">
+                        <Link to="/profile" className="pb-3 sm:pb-4 hover:text-slate-900 transition-colors whitespace-nowrap">
                             Posts
                         </Link>
                         
-                        <Link to="/new-post" className="pb-4 text-indigo-600 border-b-2 border-indigo-600">
+                        <Link to="/new-post" className="pb-3 sm:pb-4 text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap">
                             New Post
                         </Link>
                         
-                        <Link to="/comments" className="pb-4 hover:text-slate-900 transition-colors">
+                        <Link to="/comments" className="pb-3 sm:pb-4 hover:text-slate-900 transition-colors whitespace-nowrap">
                             Comments
                         </Link>
                     </div>
 
                     {/* Right Side: User Info & Logout Button */}
-                    <div className="flex items-center gap-6 pb-4">
-                        <p className="text-md text-slate-700">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pb-4 w-full sm:w-auto border-t sm:border-none border-slate-100 pt-3 sm:pt-0">
+                        <p className="text-sm sm:text-md text-slate-700">
                             Welcome <strong>{user.name}</strong>
                         </p>
                         
                         <button 
                             onClick={handleLogout}
-                            className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0"
                         >
                             Logout
                         </button>
@@ -182,9 +182,9 @@ const NewPost = ({user, setUser}) => {
                         {errors}
                     </div>
                 )}
-                <form action="/api/submit-post" method="POST" className="flex flex-col lg:flex-row gap-10 w-full max-w-6xl mx-auto px-4 p-8" onSubmit={handlePostSubmit}>
+                <form action="/api/submit-post" method="POST" className="flex flex-col lg:flex-row gap-8 lg:gap-10 w-full max-w-6xl mx-auto px-4 py-6 lg:p-8" onSubmit={handlePostSubmit}>
                     {/* Left hand side  */}
-                    <section className="flex flex-1 flex-col gap-8">
+                    <section className="flex flex-1 flex-col gap-6 sm:gap-8">
                         {/* Post title */}
                         <div>
                             <label htmlFor="postTitle"></label>
@@ -196,16 +196,16 @@ const NewPost = ({user, setUser}) => {
                                 onChange={handleChange}
                                 maxLength={60}
                                 placeholder="Post Title"
-                                className="w-full px-0 py-3 text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
+                                className="w-full px-0 py-3 text-2xl sm:text-3xl font-bold placeholder-slate-400 text-slate-900 border-b border-slate-200 focus:border-indigo-600 focus:outline-none transition-colors bg-transparent"
                                 required
                             />
-                            <p className="text-sm text-slate-500">Max 60 characters</p>
+                            <p className="text-sm text-slate-500 mt-1">Max 60 characters</p>
                         </div>
                         
                         {/* Cover Image */}
                         <div className="flex flex-col gap-2 w-full">
                             {/* Dash Box */}
-                            <div className="flex justify-center relative px-6 py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
+                            <div className="flex justify-center relative px-4 sm:px-6 py-12 sm:py-16 border-2 border-dashed rounded-xl transition-all cursor-pointer bg-white border-slate-300 hover:border-slate-400">
                                 <input 
                                     type="file" 
                                     name="postCoverImage" 
@@ -215,8 +215,8 @@ const NewPost = ({user, setUser}) => {
                                     accept="image/*"
                                     required
                                 />
-                                <img id="imagePreview" src="#" alt="your image" style={{display: "none"}} className="max-h-[400px] object-contain relative z-0 pointer-events-none"/>
-                                <div id="addImage" className="flex flex-col justify-center items-center pointer-events-none">
+                                <img id="imagePreview" src="#" alt="your image" style={{display: "none"}} className="max-h-[300px] sm:max-h-[400px] object-contain relative z-0 pointer-events-none"/>
+                                <div id="addImage" className="flex flex-col justify-center items-center pointer-events-none text-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-image w-8 h-8 text-slate-400 mb-3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
                                     <p className="text-sm text-slate-500">Click or drag to upload cover image</p>
                                 </div>
@@ -238,10 +238,7 @@ const NewPost = ({user, setUser}) => {
                                     }}
                                     init={{
                                     plugins: [
-                                        // Core editing features
                                         'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-                                        // Your account includes a free trial of TinyMCE premium features
-                                        // Try the most popular premium features until Apr 19, 2026:
                                         'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'tinymceai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
                                     ],
                                     height: 500,
@@ -267,10 +264,10 @@ const NewPost = ({user, setUser}) => {
                     
                     
                     {/* Right hand side  */}
-                    <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4">
+                    <section className="w-full lg:w-[380px] shrink-0 flex flex-col gap-4 mt-6 lg:mt-0">
                         <div className="flex flex-col gap-5">
                             {/* Post status && Publish */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                            <div className="p-5 sm:p-6 border shadow-sm border-slate-200 rounded-lg bg-white order-last lg:order-first">
                                 <p className="font-bold text-[17px]">Publishing</p>
                                 <div className="flex flex-col gap-1">
                                     <label htmlFor="postStatus" className="text-[14px] text-gray-700 pt-4 pb-2">Status</label>
@@ -306,7 +303,7 @@ const NewPost = ({user, setUser}) => {
                             </div>
 
                             {/* Post Organisation  */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                            <div className="p-5 sm:p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
                                 <p className="font-bold text-[17px]">Organisation</p>
                                 <div className="flex flex-col gap-1 mb-4">
                                     <label htmlFor="postCategory" className="text-[14px] text-gray-700 pt-4 pb-1">Category</label>
@@ -326,7 +323,7 @@ const NewPost = ({user, setUser}) => {
                                 </div>
 
                                 <div className="flex flex-col mb-1 gap-2">
-                                    <label htmlFor="tags">Tags <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
+                                    <label htmlFor="tags">Tags <span className="text-[13px] text-slate-500 block sm:inline">(Max 30 characters)</span></label>
                                     <input 
                                         type="text" 
                                         name="postTags" 
@@ -340,11 +337,11 @@ const NewPost = ({user, setUser}) => {
                                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                                         required
                                     />
-                                    <p className="text-[13px] text-gray-500 ml-2">Seperate with commas</p>
+                                    <p className="text-[13px] text-gray-500 ml-1 sm:ml-2">Seperate with commas</p>
                                 </div>
 
-                                <div className="flex flex-col mb-1 gap-2">
-                                    <label htmlFor="postReadMin">Read Time <span className="text-[13px] text-slate-500">(In Minutes)</span></label>
+                                <div className="flex flex-col mb-1 gap-2 mt-3">
+                                    <label htmlFor="postReadMin">Read Time <span className="text-[13px] text-slate-500 block sm:inline">(In Minutes)</span></label>
                                     <input 
                                         type="number"
                                         name="postReadMin" 
@@ -356,16 +353,16 @@ const NewPost = ({user, setUser}) => {
                                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                                         required
                                     />
-                                    <p className="text-[13px] text-gray-500 ml-2">Max 60 min</p>
+                                    <p className="text-[13px] text-gray-500 ml-1 sm:ml-2">Max 60 min</p>
                                 </div>
                             </div>
                             
                             {/* Post SEO  */}
-                            <div className="p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
+                            <div className="p-5 sm:p-6 border shadow-sm border-slate-200 rounded-lg bg-white">
                                 <p className="font-bold text-[17px]">SEO</p>
 
                                 <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500">(Max 30 characters)</span></label>
+                                    <label htmlFor="postUrl" className="text-[14px] text-gray-700 pt-4 pb-1">URL Slug <span className="text-[13px] text-slate-500 block sm:inline">(Max 30 characters)</span></label>
                                     <input 
                                         type="text" 
                                         name="postUrl" 
@@ -382,7 +379,7 @@ const NewPost = ({user, setUser}) => {
                                 </div>
 
                                 <div className="flex flex-col gap-1 mb-4">
-                                    <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500">(Max 175 characters)</span></label>
+                                    <label htmlFor="postSummary" className="text-[14px] text-gray-700 pt-4 pb-1">Excerpt / Summary <span className="text-[13px] text-slate-500 block sm:inline">(Max 175 characters)</span></label>
                                     <textarea 
                                         type="text" 
                                         name="postSummary" 
