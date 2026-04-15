@@ -43,7 +43,7 @@ function App() {
             element= { <ShowPost user={user} setUser={setUser}/> } 
           />
 
-          {/* Public Route:s Profile */}
+          {/* Public Route: Profile */}
           <Route 
             path="/profile" 
             element={ <Profile user={user} setUser={setUser} />}  

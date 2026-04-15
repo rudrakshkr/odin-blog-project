@@ -9,11 +9,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Link } from "react-router"
+import { TailSpin } from "react-loader-spinner"
 import { useLocation, useNavigate } from "react-router"
 
 export function LoginForm({ className, setUser, ...props }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState('');
 
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ export function LoginForm({ className, setUser, ...props }) {
     setErrors('');
     
     try {
+      setIsSubmitting(true);
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -43,10 +46,17 @@ export function LoginForm({ className, setUser, ...props }) {
         if (setUser) {
           setUser({ auth: true, name: data.username });
         }
-        navigate('/profile');
-      }
+        console.log("Navigating with state:", { successMessage: '...' });
+        setTimeout(() => {
+          navigate('/profile', { 
+            state: { successMessage: 'Welcome back! You successfully logged in.' }
+          });
+        }, 10);      }
     } catch (err) {
       setErrors('Network error. Is the backend running?');
+    }
+    finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -101,7 +111,19 @@ export function LoginForm({ className, setUser, ...props }) {
         </Field>
         
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting && (
+            <TailSpin
+                  visible={true}
+                  height="20"
+                  width="20"
+                  color="#ffffff"
+                  ariaLabel="tail-spin-loading"
+                  radius="1"
+              />
+            )}
+            {isSubmitting ? "Logging in..." : "Login"}
+          </Button>
         </Field>
         
         <Field>

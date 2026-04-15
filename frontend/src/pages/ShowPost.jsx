@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router";
 import { ThreeDots, TailSpin } from "react-loader-spinner";
 import DOMPurify from 'dompurify';
+import { cn } from "@/lib/utils";
 
 const ShowPost = ({user, setUser}) => {
     const token = localStorage.getItem("jwtToken");
@@ -44,13 +45,21 @@ const ShowPost = ({user, setUser}) => {
     });
     const [comments, setComments] = useState([]);
     const [successMessage, setSuccessMessage] = useState("");
-
     const [errors, setErrors] = useState('');
     const [commentError, setCommentError] = useState('');
-
     const [isLoading, setIsLoading] = useState(true);
-
     const [isCommenting, setIsCommenting] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+
+    useEffect(() => {
+        if(toastMessage) {
+            const timer = setTimeout(() => {
+                setToastMessage("");
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [toastMessage]);
 
     useEffect(() => {
         localStorage.setItem(`commentDraft_${postSlug}`, JSON.stringify(newComment));
@@ -81,7 +90,8 @@ const ShowPost = ({user, setUser}) => {
                     });
                 }
 
-                setFormData({
+                setFormData(prev => ({
+                    ...prev,
                     postTitle: postData.post.title || '',
                     postDescription: postData.post.description || '',
                     postStatus: postData.post.status || 'draft',
@@ -93,8 +103,8 @@ const ShowPost = ({user, setUser}) => {
                     postDate: formattedPostDate,
                     userId: postData.post.userId || null,
                     postId: postData.post.id || null,
-                    postAuthor: ''
-                });
+                    postAuthor: prev.postAuthor || '' 
+                }));
 
                 const postId = postData.post.id;
                 const userId = postData.post.userId;
@@ -204,7 +214,8 @@ const ShowPost = ({user, setUser}) => {
         }
         else {
             localStorage.removeItem('jwtToken');
-            setUser({auth: false, name: ''})
+            setUser({auth: false, name: ''});
+            setToastMessage("You have successfully logged out!");
         }
     }
 
@@ -220,52 +231,45 @@ const ShowPost = ({user, setUser}) => {
     return (
         <div className="w-full min-h-screen flex flex-col">
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
-                <div className="flex justify-between items-center w-full max-w-6xl mx-auto px-4 h-16">
-                    
-                    {/* Left Side: Header & Navigation */}
-                    <div className="flex items-center gap-8">
-                        <div className="font-geist font-bold text-xl text-slate-900 tracking-tight">
-                            MyDevBlog
-                        </div>
-
-                        {/* Navigation Links */}
-                        <div className="flex items-center gap-6 font-geist text-[15px] font-medium text-slate-500">
-                            <Link to="/profile" className="hover:text-slate-900 transition-colors">
-                                Home
-                            </Link>
-                            <Link to="/about" className="hover:text-slate-900 transition-colors">
-                                About
-                            </Link>
-                            <a href="https://github.com/newbbiecoder" target="_blank" className="hover:text-slate-900 transition-colors">
-                                GitHub
-                            </a>
-                        </div>
+                <div className="flex flex-wrap items-center justify-between w-full max-w-6xl mx-auto px-4 py-3 sm:h-16 sm:py-0">
+                    <div className="font-geist font-bold text-xl text-slate-900 tracking-tight order-1 shrink-0">
+                        MyDevBlog
                     </div>
 
-                    {/* Right Side: User Info & Logout */}
-                    {user.auth ? (
-                        <div className="flex items-center gap-6">
-                            <p className="text-md text-slate-700">
-                                Welcome <strong>{user.name}</strong>
-                            </p>
-                            
-                            <button 
-                                onClick={handleLogout}
-                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                            >
-                                Logout
-                            </button>
-                        </div>
-                    ): (
-                        <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 sm:gap-6 order-2 sm:order-3 shrink-0">
+                        {user.auth ? (
+                            <>
+                                <p className="text-sm text-slate-700 hidden sm:block">
+                                    Welcome <strong>{user.name}</strong>
+                                </p>
+                                <button 
+                                    onClick={handleLogout}
+                                    className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ): (
                             <Link 
                                 to={"/login"}
-                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
                             >
                                 Log In
                             </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-6 font-geist text-[14px] sm:text-[15px] font-medium text-slate-500 order-3 sm:order-2 w-full sm:w-auto mt-3 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 sm:border-none">
+                        <Link to="/profile" className="hover:text-slate-900 transition-colors">
+                            Home
+                        </Link>
+                        <Link to="/about" className="hover:text-slate-900 transition-colors">
+                            About
+                        </Link>
+                        <a href="https://github.com/rudrakshkr" target="_blank" rel="noreferrer" className="hover:text-slate-900 transition-colors">
+                            GitHub
+                        </a>
+                    </div>
                 </div>
             </nav>
 
@@ -290,6 +294,33 @@ const ShowPost = ({user, setUser}) => {
                                 {errors}
                             </div>
                         )}
+
+                        {/* Toast Notification  */}
+                        <div
+                            className={cn(
+                                "fixed top-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out w-[90%] max-w-[350px] sm:w-auto",
+                                toastMessage 
+                                    ? "opacity-100 translate-y-0" 
+                                    : "opacity-0 -translate-y-8 pointer-events-none"
+                            )}
+                        >
+                            <div className="flex items-center gap-3 bg-white border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 sm:px-5 py-3 rounded-xl w-full sm:min-w-[300px]">
+                                
+                                <div className="flex items-center justify-center size-8 bg-emerald-50 rounded-lg shrink-0">
+                                    <svg className="size-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                
+                                <div className="flex flex-col gap-0.5 w-full">
+                                    <p className="text-[14px] font-bold text-slate-900 leading-none">Success</p>
+                                    <p className="text-[13px] font-medium text-slate-500 leading-snug">
+                                        {toastMessage}
+                                    </p>
+                                </div>
+                                
+                            </div>
+                        </div>
 
                         {formData && (
                             <article className="w-full max-w-3xl mx-auto px-6 py-12 md:py-12">
@@ -317,7 +348,8 @@ const ShowPost = ({user, setUser}) => {
                                             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6 [&_ul>li]:mb-2
                                             [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6 [&_ol>li]:mb-2
                                             [&_a]:text-indigo-600 [&_a]:underline [&_a]:underline-offset-4
-                                            [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600"
+                                            [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600
+                                            [&_img]: max-w-full [&_img]:h-auto [&_img]:rounded-xl"
                                     dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(formData.postDescription)}} 
                                 />
 
@@ -376,18 +408,20 @@ const ShowPost = ({user, setUser}) => {
 
                                             <button 
                                                 type="submit" 
-                                                className="flex gap-4 mt-2 px-8 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm"                                        >
+                                                disabled={isCommenting}
+                                                className="flex items-center justify-center gap-2 mt-2 px-8 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all w-full md:w-auto md:self-start shadow-sm disabled:opacity-70 disabled:hover:translate-y-0 disabled:cursor-not-allowed"                                        
+                                            >
                                                 {isCommenting && (
                                                     <TailSpin
-                                                            visible={true}
-                                                            height="20"
-                                                            width="20"
-                                                            color="#ffffff"
-                                                            ariaLabel="tail-spin-loading"
-                                                            radius="1"
-                                                        />
-                                                    )}
-                                                    <p>{isCommenting ? "Posting..." : "Post Comment"}</p>
+                                                        visible={true}
+                                                        height="20"
+                                                        width="20"
+                                                        color="#ffffff"
+                                                        ariaLabel="tail-spin-loading"
+                                                        radius="1"
+                                                    />
+                                                )}
+                                                <span>{isCommenting ? "Posting..." : "Post Comment"}</span>
                                             </button>
                                         </form>
                                     </section>
@@ -404,7 +438,7 @@ const ShowPost = ({user, setUser}) => {
                                             You must be logged in to share your thoughts. Log in to your account or sign up to leave a comment!
                                         </p>
 
-                                        <div className="flex items-center gap-4 mt-2">
+                                        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto mt-4 px-4 sm:px-0">
                                             <Link 
                                                 to="/login" 
                                                 className="px-8 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-sm"

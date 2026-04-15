@@ -1,7 +1,21 @@
 import { Link } from "react-router";
 import myPhoto from "../assets/images/my-photo.jpeg";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 const About = ({user, setUser}) => {
+    // States
+    const [toastMessage, setToastMessage] = useState("");
+
+    useEffect(() => {
+        if(toastMessage) {
+            const timer = setTimeout(() => {
+                setToastMessage("");
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [toastMessage]);
 
     const handleLogout = async (e) => {
         e.preventDefault();
@@ -12,6 +26,7 @@ const About = ({user, setUser}) => {
         } else {
             localStorage.removeItem('jwtToken');
             setUser({ auth: false, name: '' });
+            setToastMessage("You have successfully logged out!");
         }
     }
 
@@ -23,58 +38,77 @@ const About = ({user, setUser}) => {
     return (
         <div className="w-full min-h-screen flex flex-col bg-white">
             <nav className="w-full bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
-                <div className="flex justify-between items-center w-full max-w-6xl mx-auto px-4 h-16">
-                    
-                    {/* Left Side: Header & Navigation */}
-                    <div className="flex items-center gap-8">
-                        <div className="font-geist font-bold text-xl text-slate-900 tracking-tight">
-                            MyDevBlog
-                        </div>
-
-                        {/* Navigation Links */}
-                        <div className="flex items-center gap-6 font-geist text-[15px] font-medium text-slate-500">
-                            <Link to="/profile" className="hover:text-slate-900 transition-colors">
-                                Home
-                            </Link>
-                            <Link to="/about" className="text-indigo-600 font-semibold">
-                                About
-                            </Link>
-                            <a href="https://github.com/newbbiecoder" target="_blank" className="hover:text-slate-900 transition-colors">
-                                GitHub
-                            </a>
-                        </div>
+                <div className="flex flex-wrap items-center justify-between w-full max-w-6xl mx-auto px-4 py-3 sm:h-16 sm:py-0">
+                    <div className="font-geist font-bold text-xl text-slate-900 tracking-tight order-1 shrink-0">
+                        MyDevBlog
                     </div>
 
-                    {/* Right Side: User Info & Logout */}
-                    {user.auth ? (
-                        <div className="flex items-center gap-6">
-                            <p className="text-md text-slate-700">
-                                Welcome <strong>{user.name}</strong>
-                            </p>
-                            
-                            <button 
-                                onClick={handleLogout}
-                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                            >
-                                Logout
-                            </button>
-                        </div>
-                    ): (
-                        <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 sm:gap-6 order-2 sm:order-3 shrink-0">
+                        {user.auth ? (
+                            <>
+                                <p className="text-sm text-slate-700 hidden sm:block">
+                                    Welcome <strong>{user.name}</strong>
+                                </p>
+                                <button 
+                                    onClick={handleLogout}
+                                    className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ): (
                             <Link 
                                 to={"/login"}
-                                className="px-4 py-1.5 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
                             >
                                 Log In
                             </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-6 font-geist text-[14px] sm:text-[15px] font-medium text-slate-500 order-3 sm:order-2 w-full sm:w-auto mt-3 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 sm:border-none">
+                        <Link to="/profile" className="hover:text-slate-900 transition-colors">
+                            Home
+                        </Link>
+                        <Link to="/about" className="text-indigo-600 font-semibold">
+                            About
+                        </Link>
+                        <a href="https://github.com/rudrakshkr" target="_blank" rel="noreferrer" className="hover:text-slate-900 transition-colors">
+                            GitHub
+                        </a>
+                    </div>
                 </div>
             </nav>
 
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-gradient-to-b from-indigo-100/50 to-transparent blur-3xl -z-10 rounded-full pointer-events-none"></div>
 
             <main className="w-full flex-1 pt-16 md:pt-24 px-4 pb-20">
+
+                {/* Toast Notification  */}
+                <div
+                    className={cn(
+                        "fixed top-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out",
+                        toastMessage 
+                            ? "opacity-100 translate-y-0" 
+                            : "opacity-0 -translate-y-8 pointer-events-none"
+                    )}
+                >
+                    <div className="flex items-center gap-3 bg-white border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-5 py-3 rounded-xl min-w-[300px]">
+                        <div className="flex items-center justify-center size-8 bg-emerald-50 rounded-lg shrink-0">
+                            <svg className="size-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        
+                        <div className="flex flex-col gap-0.5">
+                            <p className="text-[14px] font-bold text-slate-900 leading-none">Success</p>
+                            <p className="text-[13px] font-medium text-slate-500 whitespace-nowrap">
+                                {toastMessage}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-12">
                     {/* Intro  */}
 
@@ -125,7 +159,7 @@ const About = ({user, setUser}) => {
                     <section className="flex flex-col sm:flex-row flex-wrap gap-4 pt-8 w-full max-w-2xl justify-center">
                         {/* GitHub */}
                         <a 
-                            href="https://github.com/newbbiecoder" 
+                            href="https://github.com/rudrakshkr" 
                             target="_blank" 
                             rel="noreferrer"
                             className="flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 hover:-translate-y-0.5 transition-all w-full sm:w-auto shadow-sm"
