@@ -15,7 +15,7 @@ export default defineConfig({
     port: 5175,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://odin-blog-api-fbki.onrender.com',
         changeOrigin: true
       }
     }
