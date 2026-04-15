@@ -343,15 +343,18 @@ const ShowPost = ({user, setUser}) => {
 
                                 {/* Content Section */}
                                 <div 
-                                    className="text-lg text-slate-800 leading-relaxed font-geist
+                                    className="text-base sm:text-lg text-slate-800 leading-relaxed font-geist
                                             [&_p]:mb-6 
-                                            [&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-12 [&_h2]:mb-6
-                                            [&_h3]:text-2xl [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-8 [&_h3]:mb-4
+                                            [&_h2]:text-2xl sm:[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-12 [&_h2]:mb-6
+                                            [&_h3]:text-xl sm:[&_h3]:text-2xl [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-8 [&_h3]:mb-4
                                             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6 [&_ul>li]:mb-2
                                             [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6 [&_ol>li]:mb-2
                                             [&_a]:text-indigo-600 [&_a]:underline [&_a]:underline-offset-4
                                             [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600
-                                            [&_img]: max-w-full [&_img]:h-auto [&_img]:rounded-xl"
+                                            [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl
+                                            [&_pre]:text-sm sm:[&_pre]:text-base [&_pre]:overflow-x-auto [&_pre]:bg-slate-900 [&_pre]:text-slate-50 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:mb-6
+                                            [&_code]:text-sm sm:[&_code]:text-base [&_code]:font-mono [&_code]:bg-slate-100 [&_code]:text-pink-600 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md
+                                            [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0"
                                     dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(formData.postDescription)}} 
                                 />
 
